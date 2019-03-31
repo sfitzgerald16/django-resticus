@@ -14,3 +14,7 @@ class TestSettings(TestCase):
         })
         with self.assertRaises(ImportError):
             settings.DEFAULT_AUTHENTICATION_CLASSES
+
+    def test_class_imports(self):
+        assert api_settings.JSON_DECODER == encoders.JSONDecoder
+        assert api_settings.JSON_ENCODER == encoders.JSONEncoder
