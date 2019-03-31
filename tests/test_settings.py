@@ -1,5 +1,6 @@
 from django.test import TestCase
-from resticus.settings import APISettings
+from resticus.settings import APISettings, api_settings
+from resticus import encoders
 
 
 class TestSettings(TestCase):
