@@ -56,7 +56,5 @@ class ValidationError(APIException):
     default_reason = _('Malformed request.')
 
     def __init__(self, form, **kwargs):
-        # rapidjson doesn't properly serialize collection.User[List|Dict], which
-        # is used for Django's Error[List|Dict], so we have to manually convert.
-        kwargs.setdefault('details', {k: list(v) for k, v in form.errors.items()})
-        super(ValidationError, self).__init__(self, **kwargs)
+        kwargs.setdefault('details', form.errors.get_json_data())
+        super(ValidationError, self).__init__(**kwargs)

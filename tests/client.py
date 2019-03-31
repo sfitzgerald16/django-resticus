@@ -1,7 +1,8 @@
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.test.client import Client, MULTIPART_CONTENT
 from django.test.utils import override_settings
+from django.urls import reverse
+
 from resticus.compat import json
 
 
@@ -42,15 +43,15 @@ class TestClient(Client):
                 **extra))
 
     def put(self, url_name, data={}, content_type=MULTIPART_CONTENT,
-            follow=False, *args, **kwargs):
+            follow=False, extra={}, *args, **kwargs):
         return self.process(
             super(TestClient, self).put(
                 reverse(url_name, args=args, kwargs=kwargs),
-                content_type=content_type, data=data, follow=follow))
+                content_type=content_type, data=data, follow=follow, **extra))
 
     def delete(self, url_name, data={}, content_type=MULTIPART_CONTENT,
-            follow=False, *args, **kwargs):
+            follow=False, extra={}, *args, **kwargs):
         return self.process(
             super(TestClient, self).delete(
                 reverse(url_name, args=args, kwargs=kwargs),
-                content_type=content_type, data=data, follow=follow))
+                content_type=content_type, data=data, follow=follow, **extra))

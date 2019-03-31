@@ -29,5 +29,6 @@ class RapidJSONEncoder(object):
 
     def encode(self, data):
         import rapidjson
-        return rapidjson.dumps(data, default=self._encoder.default,
+        return rapidjson.dumps(data,
+            default=self._encoder.default,
             use_decimal=True, datetime_mode=True)

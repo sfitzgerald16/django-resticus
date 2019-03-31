@@ -11,8 +11,9 @@ except ImportError:
 
 
 class TestEndpoint(TestCase):
+    client_class = TestClient
+
     def setUp(self):
-        self.client = TestClient()
         self.author = Author.objects.create(name='User Foo')
 
     def test_author_list(self):
@@ -53,6 +54,7 @@ class TestEndpoint(TestCase):
         self.assertEqual(r.json['data']['name'],
             Author.objects.get(id=r.json['data']['id']).name)
 
+    @debug
     def test_create_author_multipart(self):
         """Exercise multipart/form-data POST"""
 
