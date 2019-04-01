@@ -7,20 +7,29 @@ from django.utils.translation import ugettext as _
 
 from .settings import api_settings
 
-__all__ = ['JSONResponse', 'JSONErrorResponse', 'Http200', 'Http201',
-    'Http204', 'Http400', 'Http401', 'Http403', 'Http404', 'Http405',
-    'Http409', 'Http500']
+__all__ = ['JSONResponse', 'StreamingJSONResponse', 'JSONErrorResponse',
+    'Http200', 'Http201', 'Http204', 'Http400', 'Http401',
+    'Http403', 'Http404', 'Http405', 'Http409', 'Http500']
 
 HTTP_HEADER_ENCODING = 'iso-8859-1'
 
 
-class JSONResponse(http.StreamingHttpResponse):
+class JSONResponse(http.HttpResponse):
     """An HTTP response class that consumes data to be serialized to JSON."""
 
     def __init__(self, data, **kwargs):
         kwargs.setdefault('content_type', 'application/json')
+        data = api_settings.JSON_ENCODER().encode(data).encode('utf-8')
+        super().__init__(content=data, **kwargs)
+
+
+class StreamingJSONResponse(http.StreamingHttpResponse):
+    def __init__(self, data, **kwargs):
+        kwargs.setdefault('content_type', 'application/json')
+        # import code
+        # code.interact(local=locals())
         data = api_settings.JSON_ENCODER().iterencode(data)
-        super(JSONResponse, self).__init__(streaming_content=data, **kwargs)
+        super().__init__(streaming_content=data, **kwargs)
 
 
 class JSONErrorResponse(JSONResponse):
@@ -38,7 +47,7 @@ class JSONErrorResponse(JSONResponse):
                 data['errors'][0]['meta'] = {
                     'traceback': ''.join(traceback.format_exception(*exc))
                 }
-        super(JSONErrorResponse, self).__init__(data, **kwargs)
+        super().__init__(data, **kwargs)
 
 
 class Http200(JSONResponse):
@@ -64,7 +73,7 @@ class Http400(JSONErrorResponse):
         data = {'errors': [{'detail': reason}]}
         if details is not None:
             data['errors'][0]['meta'] = {'details': details}
-        super(Http400, self).__init__(data, **kwargs)
+        super().__init__(data, **kwargs)
 
 
 class Http401(JSONErrorResponse):
@@ -90,7 +99,7 @@ class Http405(JSONResponse):
         data = {'errors': [{
             'detail': _('Method "{0}" not allowed').format(method),
         }]}
-        super(Http405, self).__init__(data=data, *args, **kwargs)
+        super().__init__(data=data, *args, **kwargs)
         self['Allow'] = ', '.join(permitted_methods)
 
 

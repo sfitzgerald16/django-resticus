@@ -58,6 +58,8 @@ class Endpoint(View):
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES
     data_parsers = api_settings.DATA_PARSERS
 
+    streaming = False
+
     def parse_body(self, request):
         if request.method not in ['POST', 'PUT', 'PATCH']:
             return
@@ -159,7 +161,10 @@ class Endpoint(View):
             response = self.server_error(err)
 
         if not isinstance(response, (HttpResponse, StreamingHttpResponse)):
-            response = http.Http200(response)
+            if self.streaming:
+                response = self.streaming_response(response)
+            else:
+                response = http.Http200(response)
         return response
 
     def authentication_failed(self, err):
@@ -178,6 +183,10 @@ class Endpoint(View):
 
     def api_exception(self, err):
         return err.response
+
+    def streaming_response(self, data, **kwargs):
+        kwargs.setdefault('status', 200)
+        return http.StreamingJSONResponse(data, **kwargs)
 
 
 class SessionAuthEndpoint(Endpoint):

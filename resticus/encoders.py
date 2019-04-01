@@ -2,9 +2,12 @@ import warnings
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.encoding import force_text
+import types
+
 from django.utils.functional import Promise
 
 from .compat import json
+from .iterators import iterlist
 
 
 class JSONDecoder(json.JSONDecoder):
@@ -13,7 +16,6 @@ class JSONDecoder(json.JSONDecoder):
 
 class JSONEncoder(DjangoJSONEncoder):
     def default(self, obj):
-        # Handle strings marked for translation
-        if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(JSONEncoder, self).default(obj)
+        if isinstance(obj, types.GeneratorType):
+            return iterlist(obj)
+        return super().default(obj)

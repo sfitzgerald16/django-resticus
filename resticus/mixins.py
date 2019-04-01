@@ -6,9 +6,12 @@ __all__ = ['ListModelMixin', 'DetailModelMixin', 'CreateModelMixin',
 
 
 class ListModelMixin(object):
+    streaming = True
+
     def get(self, request, *args, **kwargs):
         filter = self.get_filter()
-        return {'data': [self.serialize(obj) for obj in filter.qs]}
+        queryset = filter.qs.iterator()
+        return {'data': (self.serialize(obj) for obj in queryset)}
 
 
 class DetailModelMixin(object):
