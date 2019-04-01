@@ -15,18 +15,13 @@ class TestClient(Client):
     @staticmethod
     def process(response):
         if isinstance(response, StreamingHttpResponse):
-            # import code
-            # code.interact(local=locals())
             content = ''.join([x.decode('utf-8') for x in response.streaming_content])
         else:
             content = response.content.decode('utf-8')
 
-        try:
+        if response['Content-Type'].startswith('application/json'):
             response.json = json.loads(content)
-        except Exception as err:
-            print(err)
-            # import code
-            # code.interact(local=locals())
+        else:
             response.json = None
 
         if response.status_code == 500 and settings.DEBUG:

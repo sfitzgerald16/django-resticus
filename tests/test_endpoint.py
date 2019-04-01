@@ -54,7 +54,6 @@ class TestEndpoint(TestCase):
         self.assertEqual(r.json['data']['name'],
             Author.objects.get(id=r.json['data']['id']).name)
 
-    @debug
     def test_create_author_multipart(self):
         """Exercise multipart/form-data POST"""
 
