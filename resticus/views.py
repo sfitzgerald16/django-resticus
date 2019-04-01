@@ -75,7 +75,7 @@ class Endpoint(View):
         request.authenticator = None
         for authenticator in self.get_authenticators():
             user = authenticator.authenticate(request)
-            if user and user.is_authenticated():
+            if user and user.is_authenticated:
                 request.authenticator = authenticator
                 return user
 
@@ -139,7 +139,6 @@ class Endpoint(View):
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        request.content_type = request.META.get('CONTENT_TYPE', 'text/plain')
         request.params = dict((k, v) for (k, v) in request.GET.items())
         request.data = None
         request.raw_data = request.body
@@ -204,7 +203,6 @@ class SessionAuthEndpoint(Endpoint):
     user_fields = ('id', 'username', 'first_name', 'last_name', 'email')
 
     def get(self, request):
-        import code
         return http.Http200({
             'data': serialize(request.user, fields=self.user_fields)
         })
@@ -212,8 +210,8 @@ class SessionAuthEndpoint(Endpoint):
     get.login_required = True
 
     def post(self, request):
-        credentials = self.get_credentials(self.request)
-        request.user = auth.authenticate(**credentials)
+        credentials = self.get_credentials(request)
+        request.user = auth.authenticate(request, **credentials)
 
         if request.user is None:
             raise exceptions.AuthenticationFailed(_('Invalid username/password.'))
@@ -255,7 +253,7 @@ class TokenAuthEndpoint(Endpoint):
 
     def post(self, request):
         credentials = self.get_credentials(request)
-        request.user = auth.authenticate(**credentials)
+        request.user = auth.authenticate(request, **credentials)
 
         if request.user is None:
             raise exceptions.AuthenticationFailed(_('Invalid username/password.'))

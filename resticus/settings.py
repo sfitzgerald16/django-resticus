@@ -26,13 +26,6 @@ DEFAULTS = {
     }
 }
 
-try:
-    import rapidjson
-    DEFAULTS['JSON_DECODER'] = 'resticus.encoders.RapidJSONDecoder'
-    DEFAULTS['JSON_ENCODER'] = 'resticus.encoders.RapidJSONEncoder'
-except ImportError:
-    pass
-
 IMPORT_STRINGS = (
     'DEFAULT_AUTHENTICATION_CLASSES',
     'DEFAULT_PERMISSION_CLASSES',

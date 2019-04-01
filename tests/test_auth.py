@@ -7,15 +7,15 @@ from .testapp.models import Publisher, Author, Book
 
 
 class TestAuth(TestCase):
+    client_class = TestClient
+
     def setUp(self):
-        self.client = TestClient()
         self.user = get_user_model().objects.create_user(
             username='foo',
             password='bar'
         )
         self.token = TokenAuth.get_token_model().objects.create(user=self.user)
 
-    @debug
     def test_session_login_success(self):
         """Test that correct username/password login succeeds"""
         r = self.client.post('session_auth', data={
@@ -24,7 +24,6 @@ class TestAuth(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json['data']['username'], 'foo')
 
-    @debug
     def test_session_login_failure(self):
         """Test that incorrect username/password login fails"""
         r = self.client.post('session_auth', data={
@@ -94,6 +93,7 @@ class TestAuth(TestCase):
         })
         self.assertEqual(r.status_code, 401)
 
+    @debug
     def test_token_auth_success(self):
         """Test that the Session Auth succeeds"""
         self.client.login(username='foo', password='bar')

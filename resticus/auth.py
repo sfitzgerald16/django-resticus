@@ -50,7 +50,7 @@ class SessionAuth(BaseAuth):
         if not user:
             return
 
-        if user.is_authenticated() and not user.is_active:
+        if user.is_authenticated and not user.is_active:
             raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
 
         self.enforce_csrf(request)
@@ -134,8 +134,9 @@ class TokenAuth(BaseAuth):
 
     def lookup_user(self, request, key):
         User = get_user_model()
+        encoding = request.encoding or settings.DEFAULT_CHARSET
         try:
-            return User.objects.get(api_token__key=key)
+            return User.objects.get(api_token__key=key.decode(encoding))
         except User.DoesNotExist:
             raise exceptions.AuthenticationFailed(_('Invalid token.'))
 
