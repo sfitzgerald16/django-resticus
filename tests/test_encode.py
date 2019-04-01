@@ -22,3 +22,13 @@ class TestEncode(TestCase):
         generator = (x for x in range(10))
         encoded = ''.join(self.encoder.iterencode(generator))
         assert encoded == json.dumps([x for x in range(10)])
+
+    def test_encode_iterdict(self):
+        generator = iterdict((str(x), x) for x in range(10))
+        encoded = self.encoder.encode(generator)
+        assert encoded == json.dumps({str(x): x for x in range(10)})
+
+    def test_iterencode_iterdict(self):
+        generator = iterdict((str(x), x) for x in range(10))
+        encoded = ''.join(self.encoder.iterencode(generator))
+        assert encoded == json.dumps({str(x): x for x in range(10)})
