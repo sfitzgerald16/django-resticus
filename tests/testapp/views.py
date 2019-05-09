@@ -4,7 +4,7 @@ from resticus import generics
 from resticus.auth import login_required, BasicHttpAuth
 from resticus.exceptions import HttpError
 from resticus.http import Http201, Http403, Http404, Http400
-from resticus.utils import serialize
+from resticus.serializers import serialize
 from resticus.views import Endpoint
 
 from .models import *

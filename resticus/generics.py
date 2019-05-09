@@ -2,10 +2,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.forms.models import modelform_factory
 from django.utils.translation import ugettext as _
 
-from django_filters.filterset import filterset_factory
-
 from . import exceptions, http, mixins
-from .utils import serialize
+from .serializers import Serializer
+from .utils import filterset_factory
 from .views import Endpoint
 
 __all__ = ['GenericEndpoint', 'CreateEndpoint', 'ListEndpoint',
@@ -15,6 +14,8 @@ __all__ = ['GenericEndpoint', 'CreateEndpoint', 'ListEndpoint',
 
 class GenericEndpoint(Endpoint):
     model = None
+
+    serializer_class = Serializer
     fields = None
 
     lookup_field = 'pk'
@@ -80,8 +81,12 @@ class GenericEndpoint(Endpoint):
     def form_invalid(self, form):
         raise exceptions.ValidationError(form=form)
 
-    def serialize(self, objs):
-        return serialize(objs, fields=self.fields)
+    def get_serializer_class(self):
+        return self.serializer_class
+
+    def serialize(self, source):
+        serializer = self.get_serializer_class()
+        return serializer(source, fields=self.fields).data
 
 
 class CreateEndpoint(

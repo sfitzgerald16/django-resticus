@@ -12,8 +12,8 @@ from . import exceptions, http
 from .auth import SessionAuth, TokenAuth
 from .compat import get_user_model
 from .parsers import parse_content_type
+from .serializers import serialize
 from .settings import api_settings
-from .utils import serialize
 
 __all__ = ['Endpoint', 'SessionAuthEndpoint', 'TokenAuthEndpoint']
 
