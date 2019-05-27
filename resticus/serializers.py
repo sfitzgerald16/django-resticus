@@ -1,5 +1,7 @@
 import inspect
+import json
 
+from django.contrib.gis.geos import GEOSGeometry
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.utils.encoding import force_text
@@ -33,7 +35,12 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
     data = {}
     for field in fields:
         if isinstance(field, str):
-            data[field] = force_text(getfield(field), strings_only=True)
+            value = getfield(field)
+            if isinstance(value, GEOSGeometry):
+                # TODO: How to tap into this and get the pre-JSON data structure?
+                data[field] = json.loads(value.geojson)
+            else:
+                data[field] = force_text(value, strings_only=True)
         elif isinstance(field, tuple):
             key, value = field
             if callable(value):

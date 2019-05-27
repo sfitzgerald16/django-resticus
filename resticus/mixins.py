@@ -10,8 +10,11 @@ class ListModelMixin(object):
 
     def get(self, request, *args, **kwargs):
         filter = self.get_filter()
-        queryset = filter.qs.iterator()
-        return {'data': (self.serialize(obj) for obj in queryset)}
+        if filter is not None:
+            queryset = filter.qs
+        else:
+            queryset = self.get_queryset()
+        return {'data': (self.serialize(obj) for obj in queryset.iterator())}
 
 
 class DetailModelMixin(object):

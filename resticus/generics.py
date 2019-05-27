@@ -59,11 +59,11 @@ class GenericEndpoint(Endpoint):
     def get_filter_class(self):
         if self.filter_class is not None:
             return self.filter_class
-        return filterset_factory(self.model)
 
     def get_filter(self):
         FilterClass = self.get_filter_class()
-        return FilterClass(self.request.GET, queryset=self.get_queryset())
+        if FilterClass is not None:
+            return FilterClass(self.request.GET, queryset=self.get_queryset())
 
     def get_form_class(self):
         if self.form_class is not None:
@@ -84,9 +84,14 @@ class GenericEndpoint(Endpoint):
     def get_serializer_class(self):
         return self.serializer_class
 
-    def serialize(self, source):
+    def serialize(self, source, fields=None, include=None, exclude=None, fixup=None):
         serializer = self.get_serializer_class()
-        return serializer(source, fields=self.fields).data
+        return serializer(source,
+            fields=fields or self.fields,
+            include=include,
+            exclude=exclude,
+            fixup=fixup
+        ).data
 
 
 class CreateEndpoint(

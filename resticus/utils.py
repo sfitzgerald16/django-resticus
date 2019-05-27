@@ -14,8 +14,7 @@ __all__ = [
 
 def filterset_factory(model, fields=ALL_FIELDS):
     meta = type(str('Meta'), (object,), {'model': model, 'fields': fields})
-    filterset = type(str('%sFilterSet' % model._meta.object_name),
-                     (FilterSet,), {'Meta': meta})
+    filterset = type(str(f'{model._meta.object_name}FilterSet'), (FilterSet,), {'Meta': meta})
     return filterset
 
 
