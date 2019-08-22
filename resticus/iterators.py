@@ -31,7 +31,25 @@ class iterlist(list):
 
     def __init__(self, source):
         self.source = iter(source)
+
+        # iterencode() generates invalid json when iterlist
+        # is empty and truthy. To fix this, we need to consume
+        # the first item in the iterable and declare a proper
+        # truthiness value for __bool__().
+        try:
+            self.first = next(self.source)
+            self.empty = False
+        except StopIteration:
+            self.first = None
+            self.empty = True
         super().__init__('hack')
 
+    def __bool__(self):
+        return not self.empty
+
     def __iter__(self):
-        return self.source
+        if self.empty:
+            yield next(iter([]))
+        else:
+            yield self.first
+            yield from self.source

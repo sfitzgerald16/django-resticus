@@ -26,8 +26,6 @@ class JSONResponse(http.HttpResponse):
 class StreamingJSONResponse(http.StreamingHttpResponse):
     def __init__(self, data, **kwargs):
         kwargs.setdefault('content_type', 'application/json')
-        # import code
-        # code.interact(local=locals())
         data = api_settings.JSON_ENCODER().iterencode(data)
         super().__init__(streaming_content=data, **kwargs)
 
