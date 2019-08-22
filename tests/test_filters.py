@@ -32,5 +32,3 @@ class TestEndpoint(TestCase):
         r = self.client.get('book_list', data={'price__gte': '20'})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(len(r.json['data']), 1)
-
-

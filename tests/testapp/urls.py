@@ -23,6 +23,7 @@ urlpatterns = [
     path('publishers/<int:pk>', PublisherDetail.as_view(),
         name='publisher_detail'),
 
+    path('books/', BookList.as_view(), name='book_list'),
     path('books/<int:isbn>', BookDetail.as_view(),
         name='book_detail'),
 

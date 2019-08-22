@@ -1,9 +1,11 @@
+from django.core import paginator
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.models import modelform_factory
 from django.utils.translation import ugettext as _
 
 from . import exceptions, http, mixins
 from .serializers import Serializer
+from .settings import api_settings
 from .utils import filterset_factory
 from .views import Endpoint
 
@@ -25,6 +27,12 @@ class GenericEndpoint(Endpoint):
     form_class = None
     queryset = None
 
+    paginate = api_settings.PAGINATE
+    page_size = api_settings.PAGE_SIZE
+    page_query_param = api_settings.PAGE_QUERY_PARAM
+    page_size_query_param = api_settings.PAGE_SIZE_QUERY_PARAM
+    max_page_size = api_settings.MAX_PAGE_SIZE
+
     def get_queryset(self):
         if self.queryset is not None:
             return self.queryset._clone()
@@ -37,7 +45,7 @@ class GenericEndpoint(Endpoint):
         raise ImproperlyConfigured(msg.format(self.__class__.__name__))
 
     def get_object(self):
-        queryset = self.get_queryset()
+        queryset = self.filter_queryset(self.get_queryset())
 
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         try:
@@ -60,10 +68,36 @@ class GenericEndpoint(Endpoint):
         if self.filter_class is not None:
             return self.filter_class
 
-    def get_filter(self):
+    def filter_queryset(self, queryset):
         FilterClass = self.get_filter_class()
         if FilterClass is not None:
-            return FilterClass(self.request.GET, queryset=self.get_queryset())
+            filter = FilterClass(self.request.GET, queryset=queryset)
+            return filter.qs
+        return queryset
+
+    def paginate_queryset(self, queryset):
+        self.paginator = None
+        if self.paginate:
+            try:
+                page_size = int(self.request.GET[self.page_size_query_param])
+                page_size = max(min(page_size, self.max_page_size), 1)
+            except (KeyError, ValueError):
+                page_size = self.page_size
+
+            self.paginator = paginator.Paginator(
+                object_list=queryset,
+                per_page=page_size,
+                allow_empty_first_page=True
+            )
+
+            try:
+                page_number = int(self.request.GET.get(self.page_query_param, 1))
+                self.page = self.paginator.page(page_number)
+            except (ValueError, paginator.InvalidPage):
+                raise exceptions.NotFound(_('Invalid page.'))
+
+            return self.page.object_list
+        return queryset
 
     def get_form_class(self):
         if self.form_class is not None:

@@ -9,12 +9,23 @@ class ListModelMixin(object):
     streaming = True
 
     def get(self, request, *args, **kwargs):
-        filter = self.get_filter()
-        if filter is not None:
-            queryset = filter.qs
-        else:
-            queryset = self.get_queryset()
-        return {'data': (self.serialize(obj) for obj in queryset.iterator())}
+        queryset = self.get_queryset()
+        queryset = self.filter_queryset(queryset)
+        queryset = self.paginate_queryset(queryset)
+
+        response = {
+            'data': (self.serialize(obj) for obj in queryset.iterator())
+        }
+
+        if self.paginator is not None:
+            response.update(
+                page=self.page.number,
+                count=self.paginator.count,
+                pages=self.paginator.num_pages,
+                has_next_page=self.page.has_next(),
+                has_previous_page=self.page.has_previous()
+            )
+        return response
 
 
 class DetailModelMixin(object):

@@ -20,7 +20,7 @@ class TestModelViews(TestCase):
 
         r = self.client.get('publisher_list')
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(len(r.json), 1)
+        self.assertEqual(len(r.json['data']), 1)
         self.assertEqual(r.json['data'][0]['id'], self.publisher.id)
 
     def test_publisher_create(self):
@@ -39,7 +39,6 @@ class TestModelViews(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json['data']['id'], self.publisher.id)
 
-    @debug
     def test_publisher_update(self):
         """Excercise updating an object via POST via DetailEndpoint"""
 

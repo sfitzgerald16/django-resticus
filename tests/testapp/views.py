@@ -8,10 +8,11 @@ from resticus.serializers import serialize
 from resticus.views import Endpoint
 
 from .models import *
+from .filters import *
 from .forms import *
 
 __all__ = ['AuthorList', 'AuthorDetail', 'PublisherList', 'PublisherDetail',
-    'ReadOnlyPublisherList', 'BookDetail', 'FailsIntentionally',
+    'ReadOnlyPublisherList', 'BookList', 'BookDetail', 'FailsIntentionally',
     'WildcardHandler', 'EchoView', 'ErrorRaisingView', 'BasicAuthEndpoint']
 
 
@@ -36,6 +37,12 @@ class PublisherDetail(generics.DetailUpdateDeleteEndpoint):
 
 class ReadOnlyPublisherList(generics.DetailEndpoint):
     model = Publisher
+
+
+class BookList(generics.ListEndpoint):
+    model = Book
+    filter_class = BookFilter
+    streaming = True
 
 
 class BookDetail(generics.DetailEndpoint):

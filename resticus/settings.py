@@ -23,7 +23,14 @@ DEFAULTS = {
         'application/x-www-form-urlencoded': 'resticus.parsers.parse_post',
         'multipart/form-data': 'resticus.parsers.parse_post',
         'text/plain': 'resticus.parsers.parse_plain_text'
-    }
+    },
+
+    # Pagination
+    'PAGINATE': True,
+    'PAGE_SIZE': 100,
+    'PAGE_QUERY_PARAM': 'page',
+    'PAGE_SIZE_QUERY_PARAM': None,
+    'MAX_PAGE_SIZE': 1000,
 }
 
 IMPORT_STRINGS = (
