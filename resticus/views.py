@@ -211,14 +211,14 @@ class SessionAuthEndpoint(Endpoint):
 
     user_fields = ('id', 'username', 'first_name', 'last_name', 'email')
 
-    def get(self, request):
+    def get(self, request, **kwargs):
         return http.Http200({
             'data': serialize(request.user, fields=self.user_fields)
         })
 
     get.login_required = True
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         credentials = self.get_credentials(request)
         request.user = auth.authenticate(request, **credentials)
 
@@ -253,14 +253,14 @@ class TokenAuthEndpoint(Endpoint):
 
     user_fields = ('id', 'username', 'first_name', 'last_name', 'email')
 
-    def get(self, request):
+    def get(self, request, **kwargs):
         data = serialize(request.user, fields=self.user_fields)
         data['api_token'] = self.get_token(request).key
         return http.Http200({'data': data})
 
     get.login_required = True
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         credentials = self.get_credentials(request)
         request.user = auth.authenticate(request, **credentials)
 
