@@ -28,8 +28,7 @@ setup(
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
-        'Django>=2.2rc1',
+        'Django>=2.2',
         'django-filter>=2.1.0',
-        'six>=1.3.0'
     ],
 )

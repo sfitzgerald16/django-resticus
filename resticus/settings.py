@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.test.signals import setting_changed
-from django.utils import six
 
 from .compat import importlib
 
@@ -49,7 +48,7 @@ def perform_import(val, setting_name):
     """
     if val is None:
         return None
-    elif isinstance(val, six.string_types):
+    elif isinstance(val, str):
         return import_from_string(val, setting_name)
     elif isinstance(val, (list, tuple)):
         return [import_from_string(item, setting_name) for item in val]
