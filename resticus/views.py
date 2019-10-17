@@ -75,8 +75,12 @@ class Endpoint(View):
 
     def authenticate(self, request):
         request.authenticator = None
-        if request.user.is_authenticated:
-            return request.user
+
+        try:
+            if request.user.is_authenticated:
+                return request.user
+        except AttributeError:
+            pass
 
         for authenticator in self.get_authenticators():
             user = authenticator.authenticate(request)
