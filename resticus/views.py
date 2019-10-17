@@ -75,6 +75,9 @@ class Endpoint(View):
 
     def authenticate(self, request):
         request.authenticator = None
+        if request.user.is_authenticated:
+            return request.user
+
         for authenticator in self.get_authenticators():
             user = authenticator.authenticate(request)
             if user and user.is_authenticated:
