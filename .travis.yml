@@ -1,16 +1,26 @@
-dist: xenial
+dist: bionic
 language: python
 python:
   - "3.7"
 
 env:
-
   - TOXENV=django111_py37
   - TOXENV=django22_py37
 
   - TOXENV=coverage
 
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:ubuntugis/ppa'
+    packages:
+      - binutils
+      - libproj-dev
+      - libgeos-dev
+      - libgdal-dev
+
 install:
   - pip install tox
+  - pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
 
 script: tox
