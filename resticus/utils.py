@@ -21,6 +21,6 @@ def filterset_factory(model, fields=ALL_FIELDS):
 def patch_form(form):
     if form.is_bound:
         for field in list(form.fields.keys()):
-            if field not in form.data:
+            if field not in form.data or field not in form.files:
                 form.fields.pop(field)
     return form
