@@ -42,6 +42,8 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
                 data[field] = json.loads(value.geojson)
             elif isinstance(model_field, JSONField):
                 data[field] = value
+            elif isinstance(value, models.Manager):
+                data[field] = [item.pk for item in value.all()]
             else:
                 data[field] = force_text(value, strings_only=True)
         elif isinstance(field, tuple):
