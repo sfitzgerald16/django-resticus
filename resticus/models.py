@@ -29,13 +29,12 @@ class BaseToken(models.Model):
     class Meta:
         abstract = True
 
-if api_settings.TOKEN_MODEL == 'resticus.Token':
-    class Token(BaseToken):
-        user = models.OneToOneField(
-            AUTH_USER_MODEL,
-            related_name='api_token',
-            on_delete=models.CASCADE
-        )
+class Token(BaseToken):
+    user = models.OneToOneField(
+        AUTH_USER_MODEL,
+        related_name='api_token',
+        on_delete=models.CASCADE
+    )
 
-        def get_user(self):
-            return self.user
+    def get_user(self):
+        return self.user
