@@ -29,6 +29,7 @@ class BaseToken(models.Model):
     class Meta:
         abstract = True
 
+
 class Token(BaseToken):
     user = models.OneToOneField(
         AUTH_USER_MODEL,
