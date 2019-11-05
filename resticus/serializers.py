@@ -36,7 +36,7 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
     for field in fields:
         if isinstance(field, str):
             model_field = getfield(field)
-            value = getattr(instance, model_field and model_field.attname or field)
+            value = getattr(instance, model_field and getattr(model_field, 'attname', None) or field)
             if isinstance(value, GEOSGeometry):
                 # TODO: How to tap into this and get the pre-JSON data structure?
                 data[field] = json.loads(value.geojson)
