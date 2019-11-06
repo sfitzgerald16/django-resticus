@@ -1,3 +1,5 @@
+from django.http import Http404
+
 from . import http
 from .utils import patch_form
 
@@ -30,7 +32,10 @@ class ListModelMixin(object):
 
 class DetailModelMixin(object):
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        try:
+            self.object = self.get_object()
+        except Http404:
+            return http.Http404()
         return {'data': self.serialize(self.object)}
 
 
