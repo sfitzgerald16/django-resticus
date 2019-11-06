@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+
 from . import http
 from .utils import patch_form
 
@@ -82,5 +84,8 @@ class PatchModelMixin(object):
 class DeleteModelMixin(object):
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
-        self.object.delete()
+        try:
+            self.object.delete()
+        except ValidationError as err:
+            return http.Http400(err.message)
         return http.Http204()
