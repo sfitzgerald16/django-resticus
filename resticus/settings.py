@@ -19,8 +19,8 @@ DEFAULTS = {
     'TOKEN_MODEL': None,
     'DATA_PARSERS': {
         'application/json': 'resticus.parsers.parse_json',
-        'application/x-www-form-urlencoded': 'resticus.parsers.parse_post',
-        'multipart/form-data': 'resticus.parsers.parse_post',
+        'application/x-www-form-urlencoded': 'resticus.parsers.parse_form_encoded',
+        'multipart/form-data': 'resticus.parsers.parse_multipart',
         'text/plain': 'resticus.parsers.parse_plain_text'
     },
 

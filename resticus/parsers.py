@@ -1,3 +1,6 @@
+from io import BytesIO
+
+from django.http.multipartparser import MultiPartParser, MultiPartParserError
 from django.utils.translation import ugettext as _
 
 from .exceptions import ParseError
@@ -16,18 +19,31 @@ def parse_content_type(content_type):
     return content_type, params
 
 
+def parse_plain_text(request, **extra):
+    return (request.body, None)
+
+
 def parse_json(request, **extra):
     charset = extra.get('charset', 'utf-8')
     try:
         data = request.body.decode(charset)
-        return api_settings.JSON_DECODER().decode(data)
+        return (api_settings.JSON_DECODER().decode(data), None)
     except Exception:
         raise ParseError()
 
 
-def parse_post(request, **extra):
-    return dict(request.POST.items())
+def parse_form_encoded(request, **extra):
+    return (request.POST, None)
 
 
-def parse_plain_text(request, **extra):
-    return request.body
+def parse_multipart(request, **extra):
+    if hasattr(request, '_body'):
+        # Use already read data
+        data = BytesIO(request._body)
+    else:
+        data = request
+
+    try:
+        return request.parse_file_upload(request.META, data)
+    except MultiPartParserError as err:
+        raise ParseError()

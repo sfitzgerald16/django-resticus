@@ -38,7 +38,7 @@ class CreateModelMixin(object):
     def put(self, request, *args, **kwargs):
         form = self.get_form(
             data=request.data,
-            files=request.FILES
+            files=request.files
         )
         if form.is_valid():
             return self.form_valid(form)
@@ -57,7 +57,7 @@ class UpdateModelMixin(object):
         self.object = self.get_object()
         form = self.get_form(
             data=request.data,
-            files=request.FILES,
+            files=request.files,
             instance=self.object
         )
         if form.is_valid():
@@ -70,7 +70,7 @@ class PatchModelMixin(object):
         self.object = self.get_object()
         form = self.get_form(
             data=request.data,
-            files=request.FILES,
+            files=request.files,
             instance=self.object
         )
         form = patch_form(form)

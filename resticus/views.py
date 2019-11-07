@@ -62,7 +62,7 @@ class Endpoint(View):
 
     def parse_body(self, request):
         if request.method not in ['POST', 'PUT', 'PATCH']:
-            return
+            return (None, None)
 
         content_type, params = parse_content_type(request.content_type)
 
@@ -150,12 +150,13 @@ class Endpoint(View):
     def dispatch(self, request, *args, **kwargs):
         request.params = dict((k, v) for (k, v) in request.GET.items())
         request.data = None
+        request.files = None
         request.raw_data = request.body
 
         try:
             request.user = self.authenticate(request)
             self.check_permissions(request)
-            request.data = self.parse_body(request)
+            request.data, request.files = self.parse_body(request)
             response = super(Endpoint, self).dispatch(request, *args, **kwargs)
 
         except exceptions.AuthenticationFailed as err:
