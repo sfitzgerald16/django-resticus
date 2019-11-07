@@ -37,12 +37,16 @@ class JSONErrorResponse(JSONResponse):
     status_code = 500
 
     def __init__(self, reason=None, **kwargs):
-        data = {'errors': [{'detail': reason or self.default_reason}]}
+        data = reason or self.default_reason
+        if data is None or isinstance(data, str):
+            data = {'errors': {
+                'detail': [{'message': reason or self.default_reason}],
+            }}
 
         if settings.DEBUG:
             exc = sys.exc_info()
             if exc[0] is not None:
-                data['errors'][0]['meta'] = {
+                data['meta'] = {
                     'traceback': ''.join(traceback.format_exception(*exc))
                 }
         super().__init__(data, **kwargs)
@@ -67,12 +71,6 @@ class Http400(JSONErrorResponse):
     """HTTP 400 Bad Request"""
     status_code = 400
 
-    def __init__(self, reason, details=None, **kwargs):
-        data = {'errors': [{'detail': reason}]}
-        if details is not None:
-            data['errors'][0]['meta'] = {'details': details}
-        super().__init__(data, **kwargs)
-
 
 class Http401(JSONErrorResponse):
     """HTTP 401 Unauthorized"""
@@ -94,9 +92,9 @@ class Http405(JSONResponse):
     status_code = 405
 
     def __init__(self, method, permitted_methods, *args, **kwargs):
-        data = {'errors': [{
-            'detail': _('Method "{0}" not allowed').format(method),
-        }]}
+        data = {'errors': {
+            'detail': [{'message': _('Method "{0}" not allowed').format(method)}],
+        }}
         super().__init__(data=data, *args, **kwargs)
         self['Allow'] = ', '.join(permitted_methods)
 
