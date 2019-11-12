@@ -125,7 +125,8 @@ class GenericEndpoint(Endpoint):
             fields=fields or self.fields,
             include=include,
             exclude=exclude,
-            fixup=fixup
+            fixup=fixup,
+            request=self.request
         ).data
 
 
