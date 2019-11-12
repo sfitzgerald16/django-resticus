@@ -11,7 +11,7 @@ from django.utils.functional import cached_property
 __all__ = ['serialize', 'flatten']
 
 
-def serialize_model(instance, fields=None, include=None, exclude=None, fixup=None):
+def serialize_model(instance, fields=None, include=None, exclude=None, fixup=None, request=None):
     def getfield(name):
         try:
             return instance._meta.concrete_model._meta.get_field(name)
@@ -37,7 +37,12 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
         if isinstance(field, str):
             model_field = getfield(field)
             value = getattr(instance, model_field and getattr(model_field, 'attname', None) or field)
-            if isinstance(value, GEOSGeometry):
+            if isinstance(model_field, models.FileField):
+                value = value.url if value else None
+                if value is not None and request is not None:
+                    value = request.build_absolute_uri(value)
+                data[field] = value
+            elif isinstance(value, GEOSGeometry):
                 # TODO: How to tap into this and get the pre-JSON data structure?
                 data[field] = json.loads(value.geojson)
             elif isinstance(model_field, JSONField):
@@ -59,7 +64,7 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
     return data
 
 
-def serialize(src, fields=None, include=None, exclude=None, fixup=None):
+def serialize(src, fields=None, include=None, exclude=None, fixup=None, request=None):
     """Serialize Model or a QuerySet instance to Python primitives.
     By default, all the model fields (and only the model fields) are
     serialized. If the field is a Python primitive, it is serialized as such,
@@ -113,7 +118,7 @@ def serialize(src, fields=None, include=None, exclude=None, fixup=None):
 
     def subs(subsrc):
         return serialize(subsrc, fields=fields, include=include,
-            exclude=exclude, fixup=fixup)
+            exclude=exclude, fixup=fixup, request=request)
 
     if isinstance(src, models.Manager):
         return [subs(instance) for instance in src.all()]
@@ -126,7 +131,7 @@ def serialize(src, fields=None, include=None, exclude=None, fixup=None):
 
     elif isinstance(src, models.Model):
         return serialize_model(src, fields=fields, include=include,
-            exclude=exclude, fixup=fixup)
+            exclude=exclude, fixup=fixup, request=request)
 
     else:
         return src
@@ -154,12 +159,13 @@ class Serializer:
     exclude = None
     fixup = None
 
-    def __init__(self, source, fields=None, include=None, exclude=None, fixup=None):
+    def __init__(self, source, fields=None, include=None, exclude=None, fixup=None, request=None):
         self.source = source
         self.fields = fields or self.fields
         self.include = include or self.include
         self.exclude = exclude or self.exclude
         self.fixup = fixup or self.fixup
+        self.request = request
 
     @cached_property
     def data(self):
@@ -172,4 +178,4 @@ class Serializer:
 
     def serialize(self):
         return serialize(self.source, fields=self.fields, include=self.include,
-            exclude=self.exclude, fixup=self.handle_fixup)
+            exclude=self.exclude, fixup=self.handle_fixup, request=self.request)
