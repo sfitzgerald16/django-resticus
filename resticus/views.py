@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import HttpResponse, StreamingHttpResponse, Http404
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
@@ -158,6 +158,9 @@ class Endpoint(View):
             self.check_permissions(request)
             request.data, request.files = self.parse_body(request)
             response = super(Endpoint, self).dispatch(request, *args, **kwargs)
+
+        except Http404:
+            return http.Http404()
 
         except exceptions.AuthenticationFailed as err:
             response = self.authentication_failed(err)
