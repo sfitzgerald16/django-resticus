@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import AnonymousUser
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
@@ -161,6 +161,9 @@ class Endpoint(View):
 
         except exceptions.AuthenticationFailed as err:
             response = self.authentication_failed(err)
+
+        except ValidationError as err:
+            return http.Http400(err.message)
 
         except exceptions.APIException as err:
             response = self.api_exception(err)
