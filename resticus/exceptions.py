@@ -56,5 +56,5 @@ class ValidationError(APIException):
     default_reason = _('Malformed request.')
 
     def __init__(self, form, **kwargs):
-        kwargs.setdefault('details', form.errors.get_json_data())
-        super(ValidationError, self).__init__(**kwargs)
+        errors = {'errors': form.errors.get_json_data()}
+        super(ValidationError, self).__init__(errors, **kwargs)

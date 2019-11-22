@@ -72,3 +72,8 @@ class TestModelViews(TestCase):
         r = self.client.get('book_detail', isbn=self.book.isbn)
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json['data']['id'], self.book.id)
+
+    def test_author_create_invalid(self):
+        """Test the form validation errors"""
+        r = self.client.post('author_list', {})
+        self.assertEqual(r.status_code, 400)
