@@ -1,3 +1,4 @@
+import builtins
 import inspect
 import json
 
@@ -64,7 +65,7 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
     return data
 
 
-def serialize(src, fields=None, include=None, exclude=None, fixup=None, request=None):
+def serialize(src, fields=None, include=None, exclude=None, fixup=None, request=None, filter=None):
     """Serialize Model or a QuerySet instance to Python primitives.
     By default, all the model fields (and only the model fields) are
     serialized. If the field is a Python primitive, it is serialized as such,
@@ -118,13 +119,13 @@ def serialize(src, fields=None, include=None, exclude=None, fixup=None, request=
 
     def subs(subsrc):
         return serialize(subsrc, fields=fields, include=include,
-            exclude=exclude, fixup=fixup, request=request)
+            exclude=exclude, fixup=fixup, request=request, filter=filter)
 
     if isinstance(src, models.Manager):
-        return [subs(instance) for instance in src.all()]
+        return [subs(instance) for instance in builtins.filter(filter, src.all())]
 
     elif isinstance(src, (list, set, models.query.QuerySet)):
-        return [subs(instance) for instance in src]
+        return [subs(instance) for instance in builtins.filter(filter, src)]
 
     elif isinstance(src, dict):
         return dict((key, subs(value)) for key, value in src.items())
@@ -158,14 +159,16 @@ class Serializer:
     include = None
     exclude = None
     fixup = None
+    filter = None
 
-    def __init__(self, source, fields=None, include=None, exclude=None, fixup=None, request=None):
+    def __init__(self, source, fields=None, include=None, exclude=None, fixup=None, request=None, filter=None):
         self.source = source
         self.fields = fields or self.fields
         self.include = include or self.include
         self.exclude = exclude or self.exclude
         self.fixup = fixup or self.fixup
         self.request = request
+        self.filter = filter or self.filter
 
     @cached_property
     def data(self):
@@ -178,4 +181,4 @@ class Serializer:
 
     def serialize(self):
         return serialize(self.source, fields=self.fields, include=self.include,
-            exclude=self.exclude, fixup=self.handle_fixup, request=self.request)
+            exclude=self.exclude, fixup=self.handle_fixup, request=self.request, filter=self.filter)
