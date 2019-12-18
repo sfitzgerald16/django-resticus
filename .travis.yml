@@ -6,6 +6,7 @@ python:
 env:
   - TOXENV=django111_py37
   - TOXENV=django22_py37
+  - TOXENV=django30_py37
 
   - TOXENV=coverage
 
