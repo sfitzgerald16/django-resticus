@@ -185,4 +185,3 @@ class TestSerialization(TestCase):
             filter=lambda book: int(book.isbn.split('-')[-1]) < 5
         )
         assert len(s) == 5
-
