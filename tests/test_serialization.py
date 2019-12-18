@@ -177,3 +177,11 @@ class TestSerialization(TestCase):
             include=[('desc', accessor)])
 
         self.assertEqual(runs[0], 2)
+
+    def test_filtering(self):
+        s = serialize(
+            self.books,
+            fields=('id', 'isbn'),
+            filter=lambda book: int(book.isbn.split('-')[-1]) < 5
+        )
+        assert len(s) == 5
