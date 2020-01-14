@@ -1,4 +1,7 @@
+import pprint
+import json
 from django.core.management.base import BaseCommand
+
 from ...schemas import SchemaGenerator
 
 
@@ -9,9 +12,8 @@ class Command(BaseCommand):
         parser.add_argument('--title', dest="title", default='', type=str)
         parser.add_argument('--url', dest="url", default=None, type=str)
         parser.add_argument('--description', dest="description", default=None, type=str)
-        parser.add_argument('--format', dest="format", choices=['openapi', 'openapi-json'], default='openapi', type=str)
         parser.add_argument('--urlconf', dest="urlconf", default=None, type=str)
-        parser.add_argument('--generator_class', dest="generator_class", default=None, type=str)
+
 
     def handle(self, *args, **options):
         generator = SchemaGenerator(
@@ -23,6 +25,10 @@ class Command(BaseCommand):
 
         # renderer = OpenAPIRenderer
         schema = generator.get_schema(request=None, public=True)
-        print('schema', schema)
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(schema)
+        # self.stdout.write(nice)
+        # print(json.dumps(schema, indent=4, sort_keys=True))
+        # self.stdout.write(schema)
         # output = renderer.render(schema, renderer_context={})
         # self.stdout.write(output.decode())
