@@ -22,9 +22,11 @@ class SchemaGenerator(object):
         if not lis:
             return
         l = lis[0]
-        if isinstance(l, URLPattern):
+        if isinstance(l, URLPattern) and acc and acc[0] == '^v4/':
+            print(l.callback.__name__, l.callback.__dict__)
+            print()
             yield acc + [str(l.pattern)]
-        elif isinstance(l, URLResolver):
+        if isinstance(l, URLResolver):
             yield from self.list_urls(l.url_patterns, acc + [str(l.pattern)])
         yield from self.list_urls(lis[1:], acc)
 
