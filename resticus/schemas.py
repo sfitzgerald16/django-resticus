@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.admindocs.views import simplify_regex, extract_views_from_urlpatterns
 from django.urls import URLPattern, URLResolver
 
 urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
@@ -16,24 +17,46 @@ class SchemaGenerator(object):
         self.version = version
         self.url = url
 
-    def list_urls(self, lis, acc=None):
-        if acc is None:
-            acc = []
-        if not lis:
-            return
-        l = lis[0]
-        if isinstance(l, URLPattern) and acc and acc[0] == '^v4/':
-            print(l.callback.__name__, l.callback.__dict__)
-            print()
-            yield acc + [str(l.pattern)]
-        if isinstance(l, URLResolver):
-            yield from self.list_urls(l.url_patterns, acc + [str(l.pattern)])
-        yield from self.list_urls(lis[1:], acc)
+    def list_urls(self, urls, paths=None):
+        if not paths:
+            paths = []
+
+        for p in urls:
+            if not hasattr(p, 'url_patterns') and hasattr(p, 'pattern'):
+                paths.append(simplify_regex(str(p.pattern)))
+
+            elif hasattr(p, 'url_patterns'):
+                self.list_urls(p.url_patterns, paths=paths)
+
+        # for p in urls:
+        #     if hasattr(p, 'url_patterns'):
+        #         print('hasattr', *p.url_patterns, sep="\n")
+        #         # if 'x' is a pattern list, check for patterns and do 'y' wih them until there are none
+        #     else:
+        #         paths.append(simplify_regex(str(p.pattern)))
+
+        return paths
+        # if acc is None:
+        #     acc = []
+        # if not lis:
+        #     return
+        # l = lis[0]
+        # if isinstance(l, URLPattern) and acc and acc[0] == '^v4/':
+        #     # print(l.callback.__name__, l.callback.__dict__)
+        #     # print()
+        #     # print('simplify', simplify_regex(str(l.pattern)),
+        #     #       type(simplify_regex(str(l.pattern))))
+        #     yield acc + [str(l.pattern)]
+        # if isinstance(l, URLResolver):
+        #     print('list_urls', self.list_urls)
+        #     yield from self.list_urls(l.url_patterns, acc + [str(l.pattern)])
+        # yield from self.list_urls(lis[1:], acc)
 
     def get_paths(self):
-        paths = []
-        for p in self.list_urls(urlconf.urlpatterns):
-            paths.append(p)
+        paths = self.list_urls(urlconf.urlpatterns)
+        # for p in self.list_urls(urlconf.urlpatterns):
+        #     paths.append(p)
+        print(*paths, sep="\n")
         return paths
 
     def get_info(self):
