@@ -26,7 +26,7 @@ class Command(BaseCommand):
         # renderer = OpenAPIRenderer
         schema = generator.get_schema(request=None, public=True)
         pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(schema)
+        # pp.pprint(schema)
         # self.stdout.write(nice)
         # print(json.dumps(schema, indent=4, sort_keys=True))
         # self.stdout.write(schema)

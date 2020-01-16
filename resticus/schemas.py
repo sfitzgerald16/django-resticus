@@ -2,6 +2,8 @@ from django.conf import settings
 from django.contrib.admindocs.views import simplify_regex
 from django.urls import URLPattern, URLResolver
 
+from . import mixins
+
 urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
 
 
@@ -16,6 +18,23 @@ class SchemaGenerator(object):
         self.description = description
         self.version = version
         self.url = url
+
+    def list_routes(self, callback):
+        routes = []
+        routes_dict = {
+            mixins.ListModelMixin : 'get',
+            mixins.DetailModelMixin : 'get',
+            mixins.CreateModelMixin : 'post',
+            mixins.UpdateModelMixin : 'put',
+            mixins.PatchModelMixin : 'patch',
+            mixins.DeleteModelMixin : 'delete'
+        }
+        if hasattr(callback, 'view_class'):
+            for item in callback.view_class.__mro__:
+                if routes_dict.get(item):
+                    routes.append(routes_dict[item])
+        return routes
+
 
     def list_urls(self, urls, paths=None, prefix=None, count=0):
         if paths is None:
@@ -33,7 +52,8 @@ class SchemaGenerator(object):
 
         for p in patterns:
             if isinstance(p, URLPattern):
-                paths.append(prefix + simplify_regex(str(p.pattern)))
+                path = (prefix + simplify_regex(str(p.pattern)), {"routes": self.list_routes(p.callback)})
+                paths.append(path)
 
             elif isinstance(p, URLResolver):
                 self.list_urls(p, paths=paths, prefix=prefix, count=count+1)
