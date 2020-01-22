@@ -1,8 +1,8 @@
+import yaml
 import pprint
 import json
 from django.core.management.base import BaseCommand
 
-from ...renderers import OpenAPIRenderer
 from ...schemas import SchemaGenerator
 
 
@@ -25,12 +25,13 @@ class Command(BaseCommand):
         )
 
         renderer = OpenAPIRenderer()
-        schema = generator.get_schema(request=None, public=True)
+        with open('schema.yaml', 'w') as yml:
+            yaml.dump(schema, yml, allow_unicode=True)
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(schema)
         # self.stdout.write(nice)
         # print(json.dumps(schema, indent=4, sort_keys=True))
         # self.stdout.write(schema)
-        output = renderer.render(data=schema, renderer_context={})
+        # renderer.render(schema)
         # print(output)
-        self.stdout.write(output.decode())
+        # self.stdout.write(output.decode())

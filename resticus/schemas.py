@@ -32,7 +32,7 @@ class SchemaGenerator(object):
         if hasattr(callback, 'view_class'):
             for item in callback.view_class.__mro__:
                 if routes_dict.get(item):
-                    routes.append({routes_dict[item]: {'summary': 'placeholder'}})
+                    routes.append({routes_dict[item]: {'summary': ''}})
         return routes
 
 
