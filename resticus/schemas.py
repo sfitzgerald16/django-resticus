@@ -32,7 +32,7 @@ class SchemaGenerator(object):
         if hasattr(callback, 'view_class'):
             for item in callback.view_class.__mro__:
                 if routes_dict.get(item):
-                    routes.append(routes_dict[item])
+                    routes.append({routes_dict[item]: {'summary': 'placeholder'}})
         return routes
 
 
@@ -52,7 +52,7 @@ class SchemaGenerator(object):
 
         for p in patterns:
             if isinstance(p, URLPattern):
-                path = (prefix + simplify_regex(str(p.pattern)), {"routes": self.list_routes(p.callback)})
+                path = {prefix + simplify_regex(str(p.pattern)): self.list_routes(p.callback)}
                 paths.append(path)
 
             elif isinstance(p, URLResolver):
@@ -62,7 +62,7 @@ class SchemaGenerator(object):
 
     def get_paths(self):
         paths = self.list_urls(urlconf)
-        # print(*paths, sep="\n")
+        print(*paths, sep="\n")
         return paths
 
     def get_info(self):

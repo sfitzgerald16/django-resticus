@@ -2,6 +2,7 @@ import pprint
 import json
 from django.core.management.base import BaseCommand
 
+from ...renderers import OpenAPIRenderer
 from ...schemas import SchemaGenerator
 
 
@@ -23,12 +24,13 @@ class Command(BaseCommand):
             urlconf=options['urlconf'],
         )
 
-        # renderer = OpenAPIRenderer
+        renderer = OpenAPIRenderer()
         schema = generator.get_schema(request=None, public=True)
-        pp = pprint.PrettyPrinter(indent=4)
+        # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(schema)
         # self.stdout.write(nice)
         # print(json.dumps(schema, indent=4, sort_keys=True))
         # self.stdout.write(schema)
-        # output = renderer.render(schema, renderer_context={})
-        # self.stdout.write(output.decode())
+        output = renderer.render(data=schema, renderer_context={})
+        # print(output)
+        self.stdout.write(output.decode())

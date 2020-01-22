@@ -22,6 +22,7 @@ addons:
 
 install:
   - pip install tox
+  - pip install pyyaml
   - pip install gdal==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
 
 script: tox
