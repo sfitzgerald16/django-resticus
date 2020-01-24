@@ -26,17 +26,128 @@ class SchemaGenerator(object):
     def list_routes(self, callback):
         routes = {}
         routes_dict = {
-            mixins.ListModelMixin : 'get',
-            mixins.DetailModelMixin : 'get',
-            mixins.CreateModelMixin : 'post',
-            mixins.UpdateModelMixin : 'put',
-            mixins.PatchModelMixin : 'patch',
-            mixins.DeleteModelMixin : 'delete'
+            mixins.ListModelMixin : {
+                'get': {
+                    'summary': '',
+                    'responses': {
+                        '200': {
+                            'description': 'success'
+                        },
+                        '400': {
+                            'description': 'error'
+                        },
+                        '401': {
+                            'description': 'permission denied'
+                        },
+                        '403': {
+                            'description': 'authentication required'
+                        }
+                    }
+                }
+            },
+            mixins.DetailModelMixin: {
+                'get': {
+                    'summary': '',
+                    'responses': {
+                        '200': {
+                            'description': 'success'
+                        },
+                        '400': {
+                            'description': 'error'
+                        },
+                        '401': {
+                            'description': 'permission denied'
+                        },
+                        '403': {
+                            'description': 'authentication required'
+                        },
+                        '404': {
+                            'description': 'not found'
+                        }
+                    }
+                }
+            },
+            mixins.CreateModelMixin : {
+                'post': {
+                    'summary': '',
+                    'responses': {
+                        '201': {
+                            'description': 'created'
+                        },
+                        '400': {
+                            'description': 'error'
+                        },
+                        '401': {
+                            'description': 'permission denied'
+                        },
+                        '403': {
+                            'description': 'authentication required'
+                        },
+                    }
+                }
+            },
+            mixins.UpdateModelMixin : {
+                'put': {
+                    'summary': '',
+                    'responses': {
+                        '200': {
+                            'description': 'success'
+                        },
+                        '400': {
+                            'description': 'error'
+                        },
+                        '401': {
+                            'description': 'permission denied'
+                        },
+                        '403': {
+                            'description': 'authentication required'
+                        }
+                    }
+                }
+            },
+            mixins.PatchModelMixin : {
+                'patch': {
+                    'summary': '',
+                    'responses': {
+                        '200': {
+                            'description': 'success'
+                        },
+                        '400': {
+                            'description': 'error'
+                        },
+                        '401': {
+                            'description': 'permission denied'
+                        },
+                        '403': {
+                            'description': 'authentication required'
+                        }
+                    }
+                }
+            },
+            mixins.DeleteModelMixin : {
+                'delete': {
+                    'summary': '',
+                    'responses': {
+                        '204': {
+                            'description': 'deleted'
+                        },
+                        '400': {
+                            'description': 'error'
+                        },
+                        '401': {
+                            'description': 'permission denied'
+                        },
+                        '403': {
+                            'description': 'authentication required'
+                        }
+                    }
+                }
+            }
         }
         if hasattr(callback, 'view_class'):
             for item in callback.view_class.__mro__:
                 if routes_dict.get(item):
-                    routes.update({routes_dict[item]: {'summary': '', 'responses': {"200": {'description': 'success'}}}})
+                    routes.update(routes_dict[item])
         return routes
 
 
