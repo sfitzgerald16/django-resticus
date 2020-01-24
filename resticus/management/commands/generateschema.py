@@ -3,7 +3,6 @@ import pprint
 import json
 from django.core.management.base import BaseCommand
 
-from ...renderers import OpenAPIRenderer
 from ...schemas import SchemaGenerator
 
 

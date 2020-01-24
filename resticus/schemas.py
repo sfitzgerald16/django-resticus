@@ -4,7 +4,7 @@ from django.urls import URLPattern, URLResolver
 
 from . import mixins
 
-urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
+root_urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
 
 
 class SchemaGenerator(object):
@@ -12,15 +12,19 @@ class SchemaGenerator(object):
         if url and not url.endswith('/'):
             url += '/'
 
+        if not urlconf:
+            self.urlconf = root_urlconf
+        else:
+            self.urlconf = urlconf
+
         self.patterns = patterns
-        self.urlconf = urlconf
         self.title = title
         self.description = description
         self.version = version
         self.url = url
 
     def list_routes(self, callback):
-        routes = []
+        routes = {}
         routes_dict = {
             mixins.ListModelMixin : 'get',
             mixins.DetailModelMixin : 'get',
@@ -32,13 +36,13 @@ class SchemaGenerator(object):
         if hasattr(callback, 'view_class'):
             for item in callback.view_class.__mro__:
                 if routes_dict.get(item):
-                    routes.append({routes_dict[item]: {'summary': ''}})
+                    routes.update({routes_dict[item]: {'summary': '', 'responses': {"200": {'description': 'success'}}}})
         return routes
 
 
     def list_urls(self, urls, paths=None, prefix=None, count=0):
         if paths is None:
-            paths = []
+            paths = {}
 
         if prefix is not None and hasattr(urls, "pattern"):
             prefix = prefix + simplify_regex(str(urls.pattern))
@@ -53,16 +57,16 @@ class SchemaGenerator(object):
         for p in patterns:
             if isinstance(p, URLPattern):
                 path = {prefix + simplify_regex(str(p.pattern)): self.list_routes(p.callback)}
-                paths.append(path)
+                paths.update(path)
 
             elif isinstance(p, URLResolver):
-                self.list_urls(p, paths=paths, prefix=prefix, count=count+1)
+                self.list_urls(p, paths=paths, prefix=prefix)
 
         return paths
 
     def get_paths(self):
-        paths = self.list_urls(urlconf)
-        print(*paths, sep="\n")
+        paths = self.list_urls(self.urlconf)
+        # print(*paths, sep="\n")
         return paths
 
     def get_info(self):
