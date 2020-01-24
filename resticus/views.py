@@ -1,3 +1,5 @@
+import yaml
+
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import AnonymousUser
@@ -13,6 +15,8 @@ from . import exceptions, http
 from .auth import SessionAuth, TokenAuth
 from .compat import get_user_model
 from .parsers import parse_content_type
+from .permissions import AllowAny
+from .schemas import SchemaGenerator
 from .serializers import serialize
 from .settings import api_settings
 
@@ -303,3 +307,29 @@ class TokenAuthEndpoint(Endpoint):
         TokenModel = TokenAuth.get_token_model()
         token, created = TokenModel.objects.get_or_create(user=request.user)
         return token
+
+
+def get_schema_view(title=None, url=None, urlconf=None, patterns=None):
+    """
+    Returns a Swagger/OpenAPI schema
+    """
+    class SchemaView(Endpoint):
+        exclude_from_schema = True
+        permission_classes = [AllowAny]
+
+        def get(self, request):
+            generator = SchemaGenerator(
+                title=title,
+                url=url,
+                urlconf=urlconf,
+                patterns=patterns
+            )
+            schema = generator.get_schema(request=request)
+            schema = yaml.dump(schema, allow_unicode=True)
+
+            if not schema:
+                raise exceptions.ValidationError('Schema could not be generated.')
+
+            return HttpResponse(schema)
+
+    return SchemaView.as_view()
