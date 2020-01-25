@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.contrib.admindocs.views import simplify_regex
 from django.urls import URLPattern, URLResolver
@@ -23,12 +25,14 @@ class SchemaGenerator(object):
         self.version = version
         self.url = url
 
-    def list_routes(self, callback):
+    def list_routes(self, callback, parameters):
+        print('list_routes', callback, parameters)
         routes = {}
         routes_dict = {
             mixins.ListModelMixin : {
                 'get': {
                     'summary': '',
+                    'parameters': parameters,
                     'responses': {
                         '200': {
                             'description': 'success'
@@ -48,6 +52,7 @@ class SchemaGenerator(object):
             mixins.DetailModelMixin: {
                 'get': {
                     'summary': '',
+                    'parameters': parameters,
                     'responses': {
                         '200': {
                             'description': 'success'
@@ -70,6 +75,7 @@ class SchemaGenerator(object):
             mixins.CreateModelMixin : {
                 'post': {
                     'summary': '',
+                    'parameters': parameters,
                     'responses': {
                         '201': {
                             'description': 'created'
@@ -89,6 +95,7 @@ class SchemaGenerator(object):
             mixins.UpdateModelMixin : {
                 'put': {
                     'summary': '',
+                    'parameters': parameters,
                     'responses': {
                         '200': {
                             'description': 'success'
@@ -108,6 +115,7 @@ class SchemaGenerator(object):
             mixins.PatchModelMixin : {
                 'patch': {
                     'summary': '',
+                    'parameters': parameters,
                     'responses': {
                         '200': {
                             'description': 'success'
@@ -127,6 +135,7 @@ class SchemaGenerator(object):
             mixins.DeleteModelMixin : {
                 'delete': {
                     'summary': '',
+                    'parameters': parameters,
                     'responses': {
                         '204': {
                             'description': 'deleted'
@@ -167,7 +176,12 @@ class SchemaGenerator(object):
 
         for p in patterns:
             if isinstance(p, URLPattern):
-                path = {prefix + simplify_regex(str(p.pattern)): self.list_routes(p.callback)}
+                urlstring = prefix + simplify_regex(str(p.pattern))
+                parameters = []
+                params_list = re.findall('<(.*?)>', urlstring, re.DOTALL)
+                for param in params_list:
+                    parameters.append({'name': param, 'in': 'path', 'description': param, 'required': True, 'type': 'uuid', 'format': 'uuid'})
+                path = {urlstring: self.list_routes(p.callback, parameters)}
                 paths.update(path)
 
             elif isinstance(p, URLResolver):
