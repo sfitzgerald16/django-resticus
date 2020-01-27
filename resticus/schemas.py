@@ -26,7 +26,6 @@ class SchemaGenerator(object):
         self.url = url
 
     def list_routes(self, callback, parameters):
-        print('list_routes', callback, parameters)
         routes = {}
         routes_dict = {
             mixins.ListModelMixin : {
@@ -176,12 +175,28 @@ class SchemaGenerator(object):
 
         for p in patterns:
             if isinstance(p, URLPattern):
+                # if 'v4' in prefix and 'location' in prefix:
+                #     print(p.callback, p.callback.__doc__)
+
                 urlstring = prefix + simplify_regex(str(p.pattern))
                 parameters = []
                 params_list = re.findall('<(.*?)>', urlstring, re.DOTALL)
                 for param in params_list:
                     parameters.append({'name': param, 'in': 'path', 'description': param, 'required': True, 'type': 'uuid', 'format': 'uuid'})
-                path = {urlstring: self.list_routes(p.callback, parameters)}
+
+                path_info = self.list_routes(p.callback, parameters)
+                path_info.update({'description': 'test'})
+
+                a_list = ('description', 'get', 'post',
+                          'patch', 'put', 'delete')
+
+                pi_sorted = dict([(key, path_info[key]) for key in a_list if key in path_info])
+
+                if 'v4' in prefix and 'location' in prefix:
+                    print('sorted', pi_sorted)
+                    # print('path_info', path_info)
+
+                path = {urlstring: pi_sorted}
                 paths.update(path)
 
             elif isinstance(p, URLResolver):
