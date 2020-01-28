@@ -155,6 +155,33 @@ class SchemaGenerator(object):
                     routes.update(routes_dict[item])
         return routes
 
+    def parse_patterns(self, patterns, paths, prefix):
+        for p in patterns:
+            if isinstance(p, URLPattern):
+                urlstring = prefix + simplify_regex(str(p.pattern))
+                parameters = []
+                params_list = re.findall('<(.*?)>', urlstring, re.DOTALL)
+                for param in params_list:
+                    parameters.append({'name': param, 'in': 'path', 'description': param,
+                                        'required': True, 'type': 'uuid', 'format': 'uuid'})
+
+                path_info = self.list_routes(p.callback, parameters)
+                path_info.update({'description': 'test'})
+
+                a_list = ('description', 'get', 'post',
+                            'patch', 'put', 'delete')
+
+                pi_sorted = dict([(key, path_info[key])
+                                    for key in a_list if key in path_info])
+
+                path = {urlstring: pi_sorted}
+                paths.update(path)
+
+            elif isinstance(p, URLResolver):
+                self.list_urls(p, paths=paths, prefix=prefix)
+
+            elif isinstance(p, list):
+                self.parse_patterns(p, paths=paths, prefix=prefix)
 
     def list_urls(self, urls, paths=None, prefix=None, count=0):
         if paths is None:
@@ -167,37 +194,11 @@ class SchemaGenerator(object):
 
         if hasattr(urls, 'urlpatterns'):
             patterns = urls.urlpatterns
+            self.parse_patterns(patterns, paths, prefix)
+
         elif hasattr(urls, 'url_patterns'):
             patterns = urls.url_patterns
-
-        for p in patterns:
-            if isinstance(p, URLPattern):
-                # if 'v4' in prefix and 'location' in prefix:
-                #     print(p.callback, p.callback.__doc__)
-
-                urlstring = prefix + simplify_regex(str(p.pattern))
-                parameters = []
-                params_list = re.findall('<(.*?)>', urlstring, re.DOTALL)
-                for param in params_list:
-                    parameters.append({'name': param, 'in': 'path', 'description': param, 'required': True, 'type': 'uuid', 'format': 'uuid'})
-
-                path_info = self.list_routes(p.callback, parameters)
-                path_info.update({'description': 'test'})
-
-                a_list = ('description', 'get', 'post',
-                          'patch', 'put', 'delete')
-
-                pi_sorted = dict([(key, path_info[key]) for key in a_list if key in path_info])
-
-                if 'v4' in prefix and 'location' in prefix:
-                    print('sorted', pi_sorted)
-                    # print('path_info', path_info)
-
-                path = {urlstring: pi_sorted}
-                paths.update(path)
-
-            elif isinstance(p, URLResolver):
-                self.list_urls(p, paths=paths, prefix=prefix)
+            self.parse_patterns(patterns, paths, prefix)
 
         return paths
 
