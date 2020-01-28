@@ -10,14 +10,14 @@ root_urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
 
 
 class SchemaGenerator(object):
-    def __init__(self, title=None, description=None, patterns=None, urlconf=None, version=None):
+    def __init__(self, title=None, description=None, prefix=None, urlconf=None, version=None):
 
         if not urlconf:
             self.urlconf = root_urlconf
         else:
             self.urlconf = urlconf
 
-        self.patterns = patterns
+        self.prefix = prefix
         self.title = title
         self.description = description
         self.version = version
