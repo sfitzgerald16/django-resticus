@@ -10,9 +10,7 @@ root_urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [''])
 
 
 class SchemaGenerator(object):
-    def __init__(self, title=None, url=None, description=None, patterns=None, urlconf=None, version=None):
-        if url and not url.endswith('/'):
-            url += '/'
+    def __init__(self, title=None, description=None, patterns=None, urlconf=None, version=None):
 
         if not urlconf:
             self.urlconf = root_urlconf
@@ -23,7 +21,6 @@ class SchemaGenerator(object):
         self.title = title
         self.description = description
         self.version = version
-        self.url = url
 
     def list_routes(self, callback, parameters):
         routes = {}
