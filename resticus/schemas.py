@@ -156,6 +156,9 @@ class SchemaGenerator(object):
         return routes
 
     def parse_patterns(self, patterns, paths, prefix):
+        '''
+        Parse through url resolvers until all url patterns have been added
+        '''
         for p in patterns:
             if isinstance(p, URLPattern):
                 urlstring = prefix + simplify_regex(str(p.pattern))
@@ -184,6 +187,9 @@ class SchemaGenerator(object):
                 self.parse_patterns(p, paths=paths, prefix=prefix)
 
     def list_urls(self, urls, paths=None, prefix=None, count=0):
+        '''
+        Get a list of all urls from the given urlconf and all children
+        '''
         if paths is None:
             paths = {}
 
@@ -203,7 +209,7 @@ class SchemaGenerator(object):
         return paths
 
     def get_paths(self):
-        paths = self.list_urls(self.urlconf)
+        paths = self.list_urls(self.urlconf, prefix=self.prefix)
         # print(*paths, sep="\n")
         return paths
 

@@ -309,7 +309,7 @@ class TokenAuthEndpoint(Endpoint):
         return token
 
 
-def get_schema_view(title=None, urlconf=None, prefix=None):
+def get_schema_view(title=None, prefix=None, urlconf=None):
     """
     Returns a Swagger/OpenAPI schema
     """
@@ -320,8 +320,8 @@ def get_schema_view(title=None, urlconf=None, prefix=None):
         def get(self, request):
             generator = SchemaGenerator(
                 title=title,
-                urlconf=urlconf,
-                prefix=prefix
+                prefix=prefix,
+                urlconf=urlconf
             )
             schema = generator.get_schema(request=request)
             schema = yaml.dump(schema, allow_unicode=True)
