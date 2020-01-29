@@ -52,7 +52,7 @@ class CreateModelMixin(object):
 
     def post(self, request, *args, **kwargs):
         '''
-        Add a new object.
+        Add new object.
         '''
         return self.put(request, *args, **kwargs)
 
@@ -64,7 +64,7 @@ class CreateModelMixin(object):
 class UpdateModelMixin(object):
     def put(self, request, *args, **kwargs):
         '''
-        Update an existing object.
+        Update existing object.
         '''
         self.object = self.get_object()
         form = self.get_form(
@@ -80,7 +80,7 @@ class UpdateModelMixin(object):
 class PatchModelMixin(object):
     def patch(self, request, *args, **kwargs):
         '''
-        Update an existing object.
+        Update existing object.
         '''
         self.object = self.get_object()
         form = self.get_form(
@@ -97,7 +97,7 @@ class PatchModelMixin(object):
 class DeleteModelMixin(object):
     def delete(self, request, *args, **kwargs):
         '''
-        Delete an object.
+        Delete object.
         '''
         self.object = self.get_object()
         self.object.delete()
