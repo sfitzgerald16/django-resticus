@@ -22,17 +22,39 @@ class SchemaGenerator(object):
         self.description = description
         self.version = version
 
+    def get_model_props(self, view):
+        print('get_model_props', view, view.fields)
+
     def list_routes(self, callback, parameters):
+        '''
+        Add http methods and responses to routes
+        '''
         functions = ['get', 'post', 'put', 'patch', 'delete']
         routes = {}
+        responses = {}
         summary = ''
+
         if hasattr(callback, 'view_class'):
-            # print('*********', callback.view_class, dir(callback.view_class))
             for f in functions:
                 if hasattr(callback.view_class, f):
                     attr = getattr(callback.view_class, f)
-                    if hasattr(callback.view_class, 'model') and attr.__doc__:
-                        if hasattr(callback.view_class.model, '__name__'):
+                    if hasattr(callback.view_class, 'model'):
+                        if f == 'get' and mixins.DetailModelMixin in callback.view_class.__mro__:
+                            name = getattr(callback.view_class.model, '__name__', 'object')
+                            responses = {
+                                '200': {
+                                    'description': 'A single ' + name,
+                                    'content': {
+                                        'application/json': {
+                                            'schema': {
+                                                'type': 'object',
+                                                'properties': self.get_model_props(callback.view_class)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        if hasattr(callback.view_class.model, '__name__') and attr.__doc__:
                             summary = attr.__doc__.replace(
                                 'object', callback.view_class.model.__name__)
                     routes.update(
@@ -41,7 +63,7 @@ class SchemaGenerator(object):
                                 {
                                     'summary': summary,
                                     'parameters': parameters,
-                                    'responses': {}
+                                    'responses': responses
                                 }
                             }
                         )
