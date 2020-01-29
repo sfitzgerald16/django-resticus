@@ -23,19 +23,17 @@ class SchemaGenerator(object):
         self.version = version
 
     def list_routes(self, callback, parameters):
+        functions = ['get', 'post', 'put', 'patch', 'delete']
         routes = {}
         summary = ''
         if hasattr(callback, 'view_class'):
-            functions = ['get', 'post', 'put', 'patch', 'delete']
             for f in functions:
                 if hasattr(callback.view_class, f):
                     attr = getattr(callback.view_class, f)
-                    if hasattr(attr, '__doc__'):
-                        summary = attr.__doc__
-                        if hasattr(callback.view_class, 'model') and summary:
-                            if hasattr(callback.view_class.model, '__name__'):
-                                summary = summary.replace(
-                                    'object', callback.view_class.model.__name__)
+                    if hasattr(callback.view_class, 'model') and attr.__doc__:
+                        if hasattr(callback.view_class.model, '__name__'):
+                            summary = attr.__doc__.replace(
+                                'object', callback.view_class.model.__name__)
                     routes.update(
                         {
                             f:
