@@ -27,6 +27,7 @@ class SchemaGenerator(object):
         routes = {}
         summary = ''
         if hasattr(callback, 'view_class'):
+            # print('*********', callback.view_class, dir(callback.view_class))
             for f in functions:
                 if hasattr(callback.view_class, f):
                     attr = getattr(callback.view_class, f)
@@ -53,6 +54,7 @@ class SchemaGenerator(object):
         for p in patterns:
             if isinstance(p, URLPattern):
                 urlstring = prefix + simplify_regex(str(p.pattern))
+                urlstring = re.sub(r'//', r'/', urlstring)
                 parameters = []
                 params_list = re.findall('<(.*?)>', urlstring, re.DOTALL)
                 for param in params_list:
