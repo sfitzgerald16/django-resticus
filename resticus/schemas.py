@@ -64,8 +64,6 @@ class SchemaGenerator(object):
                             model.update({name:{'type': fields_dict[field_type]}})
                     except FieldDoesNotExist:
                         continue
-            print('****', model)
-        # return {'id': {'type': 'string'}, 'name': {'type': 'string'}, 'is_active': {'type': 'boolean'}, 'is_default': {'type': 'boolean'}, 'primary_color': {'type': 'string'}, 'header_text_color': {'type': 'string'}, 'header_text_opacity': {'type': 'integer'}, 'primary_button_color': {'type': 'string'}, 'primary_button_text_color': {'type': 'string'}, 'secondary_button_color': {'type': 'string'}, 'secondary_button_text_color': {'type': 'string'}, 'heading_text_color': {'type': 'string'}, 'text_color': {'type': 'string'}, 'app_icon': {'type': 'string'}, 'nav_icon': {'type': 'string'}, 'splash_background': {'type': 'string'}, 'splash_logo': {'type': 'string'}}
         return model
         # return {
         #     'id': {
@@ -90,21 +88,54 @@ class SchemaGenerator(object):
                 if hasattr(callback.view_class, f):
                     attr = getattr(callback.view_class, f)
                     if hasattr(callback.view_class, 'model'):
-                        if f == 'get' and mixins.DetailModelMixin in callback.view_class.__mro__:
-                            name = getattr(callback.view_class.model, '__name__', 'object')
+                        name = getattr(callback.view_class.model, '__name__', 'object')
+                        if f == 'get':
                             responses = {
                                 '200': {
-                                    'description': 'A single ' + name,
-                                    'content': {
-                                        'application/json': {
-                                            'schema': {
+                                    'description': 'success'
+                                }
+                            }
+                        if mixins.DetailModelMixin in callback.view_class.__mro__:
+                            responses['200']['description'] = 'A single ' + name + ' object'
+                            responses['200']['content'] = {
+                                'application/json': {
+                                    'schema': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'data': {
                                                 'type': 'object',
-                                                'properties': {
-                                                    'data': {
-                                                        'type': 'object',
-                                                        'properties': self.get_model_props(callback.view_class)
-                                                    }
-                                                }
+                                                'properties': self.get_model_props(callback.view_class)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        if mixins.ListModelMixin in callback.view_class.__mro__:
+                            responses['200']['description'] = 'A list of ' + name + ' objects'
+                            responses['200']['content'] = {
+                                'application/json': {
+                                    'schema': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'data': {
+                                                'type': 'object',
+                                                'properties': self.get_model_props(callback.view_class)
+                                            },
+                                            'page': {
+                                                'type': 'integer',
+                                            },
+                                            'count': {
+                                                'type': 'integer',
+                                            },
+                                            'pages': {
+                                                'type': 'integer',
+                                            },
+                                            'has_next_page': {
+                                                'type': 'boolean',
+                                            },
+                                            'has_previous_page': {
+                                                'type': 'boolean',
                                             }
                                         }
                                     }
