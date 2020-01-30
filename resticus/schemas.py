@@ -2,6 +2,7 @@ import re
 
 from django.conf import settings
 from django.contrib.admindocs.views import simplify_regex
+from django.core.exceptions import FieldDoesNotExist
 from django.urls import URLPattern, URLResolver
 
 from . import mixins
@@ -22,8 +23,58 @@ class SchemaGenerator(object):
         self.description = description
         self.version = version
 
-    def get_model_props(self, view):
-        print('get_model_props', view, view.fields)
+    def get_model_props(self, view_class):
+        model = {}
+        fields_dict = {
+            'AutoField': 'integer',
+            'BigAutoField': 'integer',
+            'BigIntegerField': 'integer',
+            'BinaryField': 'bytes',
+            'BooleanField': 'boolean',
+            'CharField': 'string',
+            'DateField': 'string',
+            'DateTimeField': 'string',
+            'DecimalField': 'number',
+            'DurationField': 'integer',
+            'EmailField': 'string',
+            'FileField': 'string',
+            'FilePathField': 'string',
+            'FloatField': 'number',
+            'ImageField': 'string',
+            'IntegerField': 'integer',
+            'GenericIPAddressField': 'string',
+            'NullBooleanField': 'boolean',
+            'PositiveIntegerField': 'integer',
+            'PositiveSmallIntegerField': 'integer',
+            'SlugField': 'string',
+            'SmallIntegerField': 'integer',
+            'TextField': 'string',
+            'TimeField': 'string',
+            'URLField': 'string',
+            'UUIDField': 'string',
+        }
+
+        if isinstance(view_class.fields, tuple):
+            for field in view_class.fields:
+                if isinstance(field, str):
+                    try:
+                        name = view_class.model._meta.get_field(field).name
+                        field_type = view_class.model._meta.get_field(field).get_internal_type()
+                        if fields_dict.get(field_type):
+                            model.update({name:{'type': fields_dict[field_type]}})
+                    except FieldDoesNotExist:
+                        continue
+            print('****', model)
+        # return {'id': {'type': 'string'}, 'name': {'type': 'string'}, 'is_active': {'type': 'boolean'}, 'is_default': {'type': 'boolean'}, 'primary_color': {'type': 'string'}, 'header_text_color': {'type': 'string'}, 'header_text_opacity': {'type': 'integer'}, 'primary_button_color': {'type': 'string'}, 'primary_button_text_color': {'type': 'string'}, 'secondary_button_color': {'type': 'string'}, 'secondary_button_text_color': {'type': 'string'}, 'heading_text_color': {'type': 'string'}, 'text_color': {'type': 'string'}, 'app_icon': {'type': 'string'}, 'nav_icon': {'type': 'string'}, 'splash_background': {'type': 'string'}, 'splash_logo': {'type': 'string'}}
+        return model
+        # return {
+        #     'id': {
+        #         'type': 'integer',
+        #     },
+        #     'name': {
+        #         'type': 'string'
+        #     }
+        # }
 
     def list_routes(self, callback, parameters):
         '''
@@ -48,7 +99,12 @@ class SchemaGenerator(object):
                                         'application/json': {
                                             'schema': {
                                                 'type': 'object',
-                                                'properties': self.get_model_props(callback.view_class)
+                                                'properties': {
+                                                    'data': {
+                                                        'type': 'object',
+                                                        'properties': self.get_model_props(callback.view_class)
+                                                    }
+                                                }
                                             }
                                         }
                                     }
