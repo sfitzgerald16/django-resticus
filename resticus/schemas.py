@@ -67,6 +67,7 @@ class SchemaGenerator(object):
         return model
 
     def list_routes(self, callback, parameters):
+        # print('list_routes', callback, parameters)
         '''
         Add http methods and responses to routes
         '''
@@ -78,12 +79,7 @@ class SchemaGenerator(object):
         if hasattr(callback, 'view_class'):
             for f in functions:
                 if hasattr(callback.view_class, f):
-                    routes.update({f: {'summary': 'test', 'responses': {'200': {'description': 'success'}}}})
-
-                    # attr = getattr(callback.view_class, f)
-                    # if hasattr(callback.view_class.model, '__name__') and attr.__doc__:
-                        # summary = attr.__doc__.replace(
-                        #     'object', callback.view_class.model.__name__)
+                    routes.update({f: {'summary': '', 'parameters': parameters, 'responses': {'200': {'description': 'success'}}}})
 
                     if hasattr(callback.view_class, 'model'):
                         attr = getattr(callback.view_class, f)
@@ -99,13 +95,13 @@ class SchemaGenerator(object):
                                 {
                                     f:
                                         {
-                                            'summary': summary,
-                                            'parameters': {},
+                                            'summary': attr.__doc__.replace('object', name),
                                             'responses': {
                                                 '204': {
                                                 'description': 'Deleted'
                                                 }
-                                            }
+                                            },
+                                            'parameters': parameters
                                         }
                                     }
                                 )
@@ -115,7 +111,7 @@ class SchemaGenerator(object):
                                     f:
                                         {
                                             'summary': summary,
-                                            'parameters': {},
+                                            'parameters': parameters,
                                             'responses': {
                                                 '201': {
                                                     'description': 'Created ' + name + ' object',
@@ -138,7 +134,7 @@ class SchemaGenerator(object):
                                 }
                             )
 
-                        if f == 'put' or 'patch' and mixins.DetailModelMixin in callback.view_class.__mro__:
+                        if f == 'put' or f == 'patch' and mixins.DetailModelMixin in callback.view_class.__mro__:
                             routes.update(
                                 {
                                     f:
@@ -166,6 +162,7 @@ class SchemaGenerator(object):
                                         }
                                 }
                             )
+
                         if f == 'get' and mixins.DetailModelMixin in callback.view_class.__mro__:
                             routes.update(
                                 {
