@@ -71,9 +71,8 @@ class SchemaGenerator(object):
         '''
         Add http methods and responses to routes
         '''
-        functions = ['get', 'post', 'put', 'patch', 'delete']
+        functions = ['get', 'post', 'patch', 'delete']
         routes = {}
-        responses = {}
         summary = ''
 
         if hasattr(callback, 'view_class'):
@@ -84,10 +83,11 @@ class SchemaGenerator(object):
                     if hasattr(callback.view_class, 'model'):
                         attr = getattr(callback.view_class, f)
                         try:
-                            name = callback.view_class.model.__name__
+                            tag = name = callback.view_class.model.__name__
                             summary = attr.__doc__.replace('object', name)
                         except AttributeError:
                             name = ''
+                            tag = 'default'
                             summary = attr.__doc__
 
                         if f == 'delete':
@@ -95,6 +95,7 @@ class SchemaGenerator(object):
                                 {
                                     f:
                                         {
+                                            'tags': [tag],
                                             'summary': attr.__doc__.replace('object', name),
                                             'responses': {
                                                 '204': {
@@ -110,6 +111,7 @@ class SchemaGenerator(object):
                                 {
                                     f:
                                         {
+                                            'tags': [tag],
                                             'summary': summary,
                                             'parameters': parameters,
                                             'responses': {
@@ -134,13 +136,14 @@ class SchemaGenerator(object):
                                 }
                             )
 
-                        if f == 'put' or f == 'patch' and mixins.DetailModelMixin in callback.view_class.__mro__:
+                        if f == 'patch' and mixins.DetailModelMixin in callback.view_class.__mro__:
                             routes.update(
                                 {
                                     f:
                                         {
+                                            'tags': [tag],
                                             'summary': summary,
-                                            'parameters': {},
+                                            'parameters': parameters,
                                             'responses': {
                                                 '200': {
                                                     'description': 'Updated ' + name + ' object',
@@ -168,8 +171,9 @@ class SchemaGenerator(object):
                                 {
                                     f:
                                         {
+                                            'tags': [tag],
                                             'summary': summary,
-                                            'parameters': {},
+                                            'parameters': parameters,
                                             'responses': {
                                                 '200': {
                                                     'description': 'A single ' + name + ' object',
@@ -197,8 +201,9 @@ class SchemaGenerator(object):
                                 {
                                     f:
                                         {
+                                            'tags': [tag],
                                             'summary': summary,
-                                            'parameters': {},
+                                            'parameters': parameters,
                                             'responses': {
                                                 '200': {
                                                     'description': 'A list of ' + name + ' objects',
@@ -249,7 +254,7 @@ class SchemaGenerator(object):
                 params_list = re.findall('<(.*?)>', urlstring, re.DOTALL)
                 for param in params_list:
                     parameters.append({'name': param, 'in': 'path', 'description': param,
-                                        'required': True, 'type': 'uuid', 'format': 'uuid'})
+                                        'required': True, 'type': 'string', 'format': 'string'})
 
                 path_info = self.list_routes(p.callback, parameters)
                 path_info.update({'description': 'test'})
