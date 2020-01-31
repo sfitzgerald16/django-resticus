@@ -26,44 +26,63 @@ class SchemaGenerator(object):
     def get_model_props(self, view_class):
         model = {}
         fields_dict = {
-            'AutoField': 'integer',
-            'BigAutoField': 'integer',
-            'BigIntegerField': 'integer',
-            'BinaryField': 'bytes',
-            'BooleanField': 'boolean',
-            'CharField': 'string',
-            'DateField': 'string',
-            'DateTimeField': 'string',
-            'DecimalField': 'number',
-            'DurationField': 'integer',
-            'EmailField': 'string',
-            'FileField': 'string',
-            'FilePathField': 'string',
-            'FloatField': 'number',
-            'ImageField': 'string',
-            'IntegerField': 'integer',
-            'GenericIPAddressField': 'string',
-            'NullBooleanField': 'boolean',
-            'PositiveIntegerField': 'integer',
-            'PositiveSmallIntegerField': 'integer',
-            'SlugField': 'string',
-            'SmallIntegerField': 'integer',
-            'TextField': 'string',
-            'TimeField': 'string',
-            'URLField': 'string',
-            'UUIDField': 'string',
+            'AutoField': {'type': 'integer'},
+            'BigAutoField': {'type': 'integer'},
+            'BigIntegerField': {'type': 'integer'},
+            'BinaryField': {'type': 'bytes'},
+            'BooleanField': {'type': 'boolean'},
+            'CharField': {'type': 'string'},
+            'DateField': {'type': 'string'},
+            'DateTimeField': {'type': 'string'},
+            'DecimalField': {'type': 'number'},
+            'DurationField': {'type': 'integer'},
+            'EmailField': {'type': 'string'},
+            'FileField': {'type': 'string'},
+            'FilePathField': {'type': 'string'},
+            'FloatField': {'type': 'number'},
+            'ForeignKey': {'type': 'array', 'items': {'type': 'string'}},
+            'ImageField': {'type': 'string'},
+            'IntegerField': {'type': 'integer'},
+            'GenericIPAddressField': {'type': 'string'},
+            'ManyToManyField': {'type': 'array', 'items': {'type': 'string'}},
+            'NullBooleanField': {'type': 'boolean'},
+            'OneToOneField': {'type': 'string'},
+            'PositiveIntegerField': {'type': 'integer'},
+            'PositiveSmallIntegerField': {'type': 'integer'},
+            'SlugField': {'type': 'string'},
+            'SmallIntegerField': {'type': 'integer'},
+            'TextField': {'type': 'string'},
+            'TimeField': {'type': 'string'},
+            'URLField': {'type': 'string'},
+            'UUIDField': {'type': 'string'},
         }
 
         if isinstance(view_class.fields, tuple):
             for field in view_class.fields:
                 if isinstance(field, str):
                     try:
+                        print(field, view_class.model._meta.get_field(
+                            field).get_internal_type())
                         name = view_class.model._meta.get_field(field).name
                         field_type = view_class.model._meta.get_field(field).get_internal_type()
                         if fields_dict.get(field_type):
-                            model.update({name:{'type': fields_dict[field_type]}})
+                            # print({name: {'type': fields_dict[field_type]}})
+                            # model.update({name:{'type': 'array', 'items': {'type': 'string'}}})
+                            model.update({name: fields_dict[field_type]})
                     except FieldDoesNotExist:
                         continue
+                elif isinstance(field, tuple):
+                    # print('tuple', field)
+                    for item in field:
+                        if isinstance(item, str):
+                            try:
+                                name = view_class.model._meta.get_field(item).name
+                                field_type = view_class.model._meta.get_field(item).get_internal_type()
+                                # print('xxx', name, field_type)
+                            except FieldDoesNotExist:
+                                continue
+                # else:
+                #     print('field not string', field, type(field))
         return model
 
     def list_routes(self, callback, parameters):
