@@ -166,68 +166,78 @@ class SchemaGenerator(object):
                                         }
                                 }
                             )
-        #                 elif f == 'get':
-        #                     responses = {
-        #                         '200': {
-        #                             'description': 'success'
-        #                         }
-        #                     }
-        #                     if mixins.DetailModelMixin in callback.view_class.__mro__:
-        #                         responses['200']['description'] = 'A single ' + name + ' object'
-        #                         responses['200']['content'] = {
-        #                             'application/json': {
-        #                                 'schema': {
-        #                                     'type': 'object',
-        #                                     'properties': {
-        #                                         'data': {
-        #                                             'type': 'object',
-        #                                             'properties': self.get_model_props(callback.view_class)
-        #                                         }
-        #                                     }
-        #                                 }
-        #                             }
-        #                         }
+                        if f == 'get' and mixins.DetailModelMixin in callback.view_class.__mro__:
+                            routes.update(
+                                {
+                                    f:
+                                        {
+                                            'summary': summary,
+                                            'parameters': {},
+                                            'responses': {
+                                                '200': {
+                                                    'description': 'A single ' + name + ' object',
+                                                    'content': {
+                                                        'application/json': {
+                                                            'schema': {
+                                                                'type': 'object',
+                                                                'properties': {
+                                                                    'data': {
+                                                                        'type': 'object',
+                                                                        'properties': self.get_model_props(callback.view_class)
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                }
+                            )
 
-        #                     elif mixins.ListModelMixin in callback.view_class.__mro__:
-        #                         responses['200']['description'] = 'A list of ' + name + ' objects'
-        #                         responses['200']['content'] = {
-        #                             'application/json': {
-        #                                 'schema': {
-        #                                     'type': 'object',
-        #                                     'properties': {
-        #                                         'data': {
-        #                                             'type': 'object',
-        #                                             'properties': self.get_model_props(callback.view_class)
-        #                                         },
-        #                                         'page': {
-        #                                             'type': 'integer',
-        #                                         },
-        #                                         'count': {
-        #                                             'type': 'integer',
-        #                                         },
-        #                                         'pages': {
-        #                                             'type': 'integer',
-        #                                         },
-        #                                         'has_next_page': {
-        #                                             'type': 'boolean',
-        #                                         },
-        #                                         'has_previous_page': {
-        #                                             'type': 'boolean',
-        #                                         }
-        #                                     }
-        #                                 }
-        #                             }
-        #                         }
-        #     routes.update(
-        #         {
-        #             f:
-        #                 {
-        #                     'summary': summary,
-        #                     'parameters': parameters,
-        #                     'responses': responses
-        #                 }
-        #             }
-        #         )
+                        if f == 'get' and mixins.ListModelMixin in callback.view_class.__mro__:
+                            routes.update(
+                                {
+                                    f:
+                                        {
+                                            'summary': summary,
+                                            'parameters': {},
+                                            'responses': {
+                                                '200': {
+                                                    'description': 'A list of ' + name + ' objects',
+                                                    'content': {
+                                                        'application/json': {
+                                                            'schema': {
+                                                                'type': 'object',
+                                                                'properties': {
+                                                                    'data': {
+                                                                        'type': 'object',
+                                                                        'properties': self.get_model_props(callback.view_class)
+                                                                    },
+                                                                    'page': {
+                                                                        'type': 'integer',
+                                                                    },
+                                                                    'count': {
+                                                                        'type': 'integer',
+                                                                    },
+                                                                    'pages': {
+                                                                        'type': 'integer',
+                                                                    },
+                                                                    'has_next_page': {
+                                                                        'type': 'boolean',
+                                                                    },
+                                                                    'has_previous_page': {
+                                                                        'type': 'boolean',
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                }
+                            )
         return routes
 
     def parse_patterns(self, patterns, paths, prefix):
