@@ -109,75 +109,63 @@ class SchemaGenerator(object):
                                         }
                                     }
                                 )
-                        # if f == 'post' and mixins.ListModelMixin in callback.view_class.__mro__:
-                        #     routes.update(
-                        #         {
-                        #             f:
-                        #                 {
-                        #                     'summary': summary,
-                        #                     'parameters': {},
-                        #                     'responses': {
-                        #                         '201': {
-                        #                             'description': 'Created ' + name + ' object',
-                        #                             'content': {
-                        #                                 'application/json': {
-                        #                                     'schema': {
-                        #                                         'type': 'object',
-                        #                                         'properties': {
-                        #                                             'data': {
-                        #                                                 'type': 'object',
-                        #                                                 'properties': self.get_model_props(callback.view_class)
-                        #                                             }
-                        #                                         }
-                        #                                     }
-                        #                                 }
-                        #                             }
-                        #                         }
-                        #                     }
-                        #                 }
-                        #         }
-                        #     )
+                        if f == 'post' and mixins.ListModelMixin in callback.view_class.__mro__:
+                            routes.update(
+                                {
+                                    f:
+                                        {
+                                            'summary': summary,
+                                            'parameters': {},
+                                            'responses': {
+                                                '201': {
+                                                    'description': 'Created ' + name + ' object',
+                                                    'content': {
+                                                        'application/json': {
+                                                            'schema': {
+                                                                'type': 'object',
+                                                                'properties': {
+                                                                    'data': {
+                                                                        'type': 'object',
+                                                                        'properties': self.get_model_props(callback.view_class)
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                }
+                            )
 
-                                # responses = {
-                                #     '201': {
-                                #         'description': 'Created ' + name + ' object',
-                                #         'content': {
-                                #             'application/json': {
-                                #                 'schema': {
-                                #                     'type': 'object',
-                                #                     'properties': {
-                                #                         'data': {
-                                #                             'type': 'object',
-                                #                             'properties': self.get_model_props(callback.view_class)
-                                #                         }
-                                #                     }
-                                #                 }
-                                #             }
-                                #         }
-                                #     }
-                                # }
-
-        #                 elif f == 'put' or 'patch':
-        #                     responses = {
-        #                         '200': {
-        #                             'description': 'success'
-        #                         }
-        #                     }
-        #                     if mixins.DetailModelMixin in callback.view_class.__mro__:
-        #                         responses['200']['description'] = 'Updated ' + name + ' object'
-        #                         responses['200']['content'] = {
-        #                             'application/json': {
-        #                                 'schema': {
-        #                                     'type': 'object',
-        #                                     'properties': {
-        #                                         'data': {
-        #                                             'type': 'object',
-        #                                             'properties': self.get_model_props(callback.view_class)
-        #                                         }
-        #                                     }
-        #                                 }
-        #                             }
-        #                         }
+                        if f == 'put' or 'patch' and mixins.DetailModelMixin in callback.view_class.__mro__:
+                            routes.update(
+                                {
+                                    f:
+                                        {
+                                            'summary': summary,
+                                            'parameters': {},
+                                            'responses': {
+                                                '200': {
+                                                    'description': 'Updated ' + name + ' object',
+                                                    'content': {
+                                                        'application/json': {
+                                                            'schema': {
+                                                                'type': 'object',
+                                                                'properties': {
+                                                                    'data': {
+                                                                        'type': 'object',
+                                                                        'properties': self.get_model_props(callback.view_class)
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                }
+                            )
         #                 elif f == 'get':
         #                     responses = {
         #                         '200': {
