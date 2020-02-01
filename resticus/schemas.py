@@ -2,7 +2,7 @@ import re
 
 from django.conf import settings
 from django.contrib.admindocs.views import simplify_regex
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.urls import URLPattern, URLResolver
 
 from . import mixins
@@ -40,7 +40,7 @@ class SchemaGenerator(object):
             'FileField': {'type': 'string'},
             'FilePathField': {'type': 'string'},
             'FloatField': {'type': 'number'},
-            'ForeignKey': {'type': 'array', 'items': {'type': 'string'}},
+            'ForeignKey': {'type': 'string'}, # This should be a string if it's forward and an array if reverse
             'ImageField': {'type': 'string'},
             'IntegerField': {'type': 'integer'},
             'GenericIPAddressField': {'type': 'string'},
@@ -61,26 +61,45 @@ class SchemaGenerator(object):
             for field in view_class.fields:
                 if isinstance(field, str):
                     try:
-                        print(field, view_class.model._meta.get_field(
-                            field).get_internal_type())
                         name = view_class.model._meta.get_field(field).name
                         field_type = view_class.model._meta.get_field(field).get_internal_type()
                         if fields_dict.get(field_type):
-                            # print({name: {'type': fields_dict[field_type]}})
-                            # model.update({name:{'type': 'array', 'items': {'type': 'string'}}})
                             model.update({name: fields_dict[field_type]})
                     except FieldDoesNotExist:
                         continue
                 elif isinstance(field, tuple):
+                    result = {}
                     # print('tuple', field)
-                    for item in field:
-                        if isinstance(item, str):
+                    if isinstance(field[0], str):
+                        try:
+                            name = view_class.model._meta.get_field(field[0]).name
                             try:
-                                name = view_class.model._meta.get_field(item).name
-                                field_type = view_class.model._meta.get_field(item).get_internal_type()
-                                # print('xxx', name, field_type)
-                            except FieldDoesNotExist:
+                                related_obj = view_class.model._meta.get_field(name).related_model
+                                # print(field[1]['fields'])
+                                fields = field[1].get('fields')
+                                if fields:
+                                    properties = {}
+                                    for f in fields:
+                                        try:
+                                            related_name = related_obj._meta.get_field(f).name
+                                            related_type = related_obj._meta.get_field(
+                                                f).get_internal_type()
+                                            if fields_dict.get(related_type):
+                                                properties.update(
+                                                    {related_name: fields_dict[related_type]})
+                                        except FieldDoesNotExist:
+                                            continue
+                                result = {
+                                    name: {
+                                        'type': 'object',
+                                        'properties': properties
+                                    }
+                                }
+                                model.update(result)
+                            except ObjectDoesNotExist:
                                 continue
+                        except FieldDoesNotExist:
+                            continue
                 # else:
                 #     print('field not string', field, type(field))
         return model
