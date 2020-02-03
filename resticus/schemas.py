@@ -37,14 +37,19 @@ class SchemaGenerator(object):
             'FileField': {'type': 'string'},
             'FilePathField': {'type': 'string'},
             'FloatField': {'type': 'number'},
-            'ForeignKey': {'type': 'string'}, # This should be a string if it's forward and an array if reverse
+            # ForeignKey should be a string if it's forward and an array if reverse, how to tell which?
+            'ForeignKey': {'type': 'string'},
             'ImageField': {'type': 'string'},
             'IntegerField': {'type': 'integer'},
             'GenericIPAddressField': {'type': 'string'},
+            'GeometryCollectionField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
             'LineStringField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
-            'LinearRing': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
+            'LinearRingField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
             'ManyToManyField': {'type': 'array', 'items': {'type': 'string'}},
-            'MultiPoint': {'type': 'array', 'items': {
+            'MultiLineStringField': {
+                'type': 'array',
+                'items': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}}},
+            'MultiPointField': {'type': 'array', 'items': {
                 'type': 'object',
                 'properties': {
                     'type': {'type': 'string'},
@@ -56,6 +61,7 @@ class SchemaGenerator(object):
                     }
                 }
             }},
+            'MultiPolygonField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}}},
             'NullBooleanField': {'type': 'boolean'},
             'OneToOneField': {'type': 'string'},
             'PointField': {
@@ -73,6 +79,8 @@ class SchemaGenerator(object):
             'PolygonField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
             'PositiveIntegerField': {'type': 'integer'},
             'PositiveSmallIntegerField': {'type': 'integer'},
+            'RasterField': {'type': 'string'},
+            # RasterField should technically be oneOf: string/object but Swagger UI does not support oneOf
             'SlugField': {'type': 'string'},
             'SmallIntegerField': {'type': 'integer'},
             'TextField': {'type': 'string'},
