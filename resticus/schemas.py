@@ -22,10 +22,7 @@ class SchemaGenerator(object):
         self.title = title
         self.description = description
         self.version = version
-
-    def get_model_props(self, view_class):
-        model = {}
-        fields_dict = {
+        self.fields_dict = {
             'AutoField': {'type': 'integer'},
             'BigAutoField': {'type': 'integer'},
             'BigIntegerField': {'type': 'integer'},
@@ -44,9 +41,36 @@ class SchemaGenerator(object):
             'ImageField': {'type': 'string'},
             'IntegerField': {'type': 'integer'},
             'GenericIPAddressField': {'type': 'string'},
+            'LineStringField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
+            'LinearRing': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
             'ManyToManyField': {'type': 'array', 'items': {'type': 'string'}},
+            'MultiPoint': {'type': 'array', 'items': {
+                'type': 'object',
+                'properties': {
+                    'type': {'type': 'string'},
+                    'coordinates': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'number'
+                        }
+                    }
+                }
+            }},
             'NullBooleanField': {'type': 'boolean'},
             'OneToOneField': {'type': 'string'},
+            'PointField': {
+                'type': 'object',
+                'properties': {
+                    'type': {'type': 'string'},
+                    'coordinates': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'number'
+                        }
+                    }
+                }
+            },
+            'PolygonField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
             'PositiveIntegerField': {'type': 'integer'},
             'PositiveSmallIntegerField': {'type': 'integer'},
             'SlugField': {'type': 'string'},
@@ -57,25 +81,26 @@ class SchemaGenerator(object):
             'UUIDField': {'type': 'string'},
         }
 
+    def get_model_props(self, view_class):
+        model = {}
+
         if isinstance(view_class.fields, tuple):
             for field in view_class.fields:
                 if isinstance(field, str):
                     try:
                         name = view_class.model._meta.get_field(field).name
                         field_type = view_class.model._meta.get_field(field).get_internal_type()
-                        if fields_dict.get(field_type):
-                            model.update({name: fields_dict[field_type]})
+                        if self.fields_dict.get(field_type):
+                            model.update({name: self.fields_dict[field_type]})
                     except FieldDoesNotExist:
                         continue
                 elif isinstance(field, tuple):
                     result = {}
-                    # print('tuple', field)
                     if isinstance(field[0], str):
                         try:
                             name = view_class.model._meta.get_field(field[0]).name
                             try:
                                 related_obj = view_class.model._meta.get_field(name).related_model
-                                # print(field[1]['fields'])
                                 fields = field[1].get('fields')
                                 if fields:
                                     properties = {}
@@ -84,9 +109,9 @@ class SchemaGenerator(object):
                                             related_name = related_obj._meta.get_field(f).name
                                             related_type = related_obj._meta.get_field(
                                                 f).get_internal_type()
-                                            if fields_dict.get(related_type):
+                                            if self.fields_dict.get(related_type):
                                                 properties.update(
-                                                    {related_name: fields_dict[related_type]})
+                                                    {related_name: self.fields_dict[related_type]})
                                         except FieldDoesNotExist:
                                             continue
                                 result = {
@@ -100,12 +125,36 @@ class SchemaGenerator(object):
                                 continue
                         except FieldDoesNotExist:
                             continue
-                # else:
-                #     print('field not string', field, type(field))
         return model
 
+    def get_form_params(self, callback, parameters):
+        print('get_form_params')
+        if callback.view_class.form_class:
+            form_param = {
+                'in': 'body',
+                'name': 'body',
+                'description': 'XXX',
+                'required': True,
+                'schema': {
+                    'type': 'object',
+                    'properties': {}
+                }
+            }
+            print(callback.view_class.form_class)
+            for field in callback.view_class.form_class._meta.fields:
+                field_type = callback.view_class.form_class._meta.model._meta.get_field(
+                    field).get_internal_type()
+                if self.fields_dict.get(field_type):
+                    print(field, field_type)
+                else:
+                    print('$$$$$$$$$$$$$$$$$$$', field, field_type)
+                # form_param['schema']['properties'].update(
+                #     {field: self.fields_dict[field_type]})
+            print(form_param)
+
+        return parameters
+
     def list_routes(self, callback, parameters):
-        # print('list_routes', callback, parameters)
         '''
         Add http methods and responses to routes
         '''
@@ -181,7 +230,7 @@ class SchemaGenerator(object):
                                         {
                                             'tags': [tag],
                                             'summary': summary,
-                                            'parameters': parameters,
+                                            'parameters': self.get_form_params(callback, parameters),
                                             'responses': {
                                                 '200': {
                                                     'description': 'Updated ' + name + ' object',
