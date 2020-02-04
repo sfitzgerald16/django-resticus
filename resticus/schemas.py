@@ -23,26 +23,49 @@ class SchemaGenerator(object):
         self.description = description
         self.version = version
         self.fields_dict = {
+            # ArrayField items should technically be oneOf multiple types but Swagger UI does not support oneOf
+            'ArrayField': {'type': 'array', 'items': {'type': 'string'}},
             'AutoField': {'type': 'integer'},
             'BigAutoField': {'type': 'integer'},
             'BigIntegerField': {'type': 'integer'},
+            'BigIntegerRangeField': {'type': 'array', 'items': {'type': 'integer'}},
             'BinaryField': {'type': 'bytes'},
             'BooleanField': {'type': 'boolean'},
             'CharField': {'type': 'string'},
+            'CICharField': {'type': 'string'},
+            'CIEmailField': {'type': 'string'},
+            'CITextField': {'type': 'string'},
             'DateField': {'type': 'string'},
+            'DateRangeField': {'type': 'array', 'items': {'type': 'string'}},
             'DateTimeField': {'type': 'string'},
+            'DateTimeRangeField': {'type': 'array', 'items': {'type': 'string'}},
             'DecimalField': {'type': 'number'},
+            'DecimalRangeField': {'type': 'array', 'items': {'type': 'number'}},
             'DurationField': {'type': 'integer'},
             'EmailField': {'type': 'string'},
             'FileField': {'type': 'string'},
             'FilePathField': {'type': 'string'},
             'FloatField': {'type': 'number'},
+            'FloatRangeField': {'type': 'array', 'items': {'type': 'number'}},
             # ForeignKey should be a string if it's forward and an array if reverse, how to tell which?
             'ForeignKey': {'type': 'string'},
             'ImageField': {'type': 'string'},
             'IntegerField': {'type': 'integer'},
+            'IntegerRangeField': {'type': 'array', 'items': {'type': 'integer'}},
             'GenericIPAddressField': {'type': 'string'},
             'GeometryCollectionField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
+            'HStoreField': {
+                'type': 'object',
+                'properties': {
+                    'type': 'string'
+                }
+            },
+            'JSONField': {
+                'type': 'object',
+                'properties': {
+                    'type': 'string'
+                }
+            },
             'LineStringField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
             'LinearRingField': {'type': 'array', 'items': {'type': 'array', 'items': {'type': 'number'}}},
             'ManyToManyField': {'type': 'array', 'items': {'type': 'string'}},
