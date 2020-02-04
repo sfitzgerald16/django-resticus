@@ -108,6 +108,7 @@ class SchemaGenerator(object):
             'SmallIntegerField': {'type': 'integer'},
             'TextField': {'type': 'string'},
             'TimeField': {'type': 'string'},
+            'TreeForeignKey': {'type': 'string'},
             'URLField': {'type': 'string'},
             'UUIDField': {'type': 'string'},
         }
@@ -159,31 +160,32 @@ class SchemaGenerator(object):
         return model
 
     def get_form_params(self, callback, parameters):
-        print('get_form_params')
+        params_with_form = list(parameters)
+
         if callback.view_class.form_class:
             form_param = {
-                'in': 'body',
                 'name': 'body',
-                'description': 'XXX',
+                'in': 'body',
+                'description': callback.view_class.model.__name__ + ' object.',
                 'required': True,
                 'schema': {
                     'type': 'object',
                     'properties': {}
                 }
             }
-            print(callback.view_class.form_class)
+
             for field in callback.view_class.form_class._meta.fields:
                 field_type = callback.view_class.form_class._meta.model._meta.get_field(
                     field).get_internal_type()
                 if self.fields_dict.get(field_type):
-                    print(field, field_type)
+                    # print(field, field_type)
+                    form_param['schema']['properties'].update(
+                        {field: self.fields_dict[field_type]})
                 else:
-                    print('$$$$$$$$$$$$$$$$$$$', field, field_type)
-                # form_param['schema']['properties'].update(
-                #     {field: self.fields_dict[field_type]})
-            print(form_param)
+                    continue
 
-        return parameters
+            params_with_form.append(form_param)
+        return params_with_form
 
     def list_routes(self, callback, parameters):
         '''
