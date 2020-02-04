@@ -178,7 +178,6 @@ class SchemaGenerator(object):
                 field_type = callback.view_class.form_class._meta.model._meta.get_field(
                     field).get_internal_type()
                 if self.fields_dict.get(field_type):
-                    # print(field, field_type)
                     form_param['schema']['properties'].update(
                         {field: self.fields_dict[field_type]})
                 else:
@@ -418,7 +417,6 @@ class SchemaGenerator(object):
 
     def get_paths(self):
         paths = self.list_urls(self.urlconf, prefix=self.prefix)
-        # print(*paths, sep="\n")
         return paths
 
     def get_info(self):
