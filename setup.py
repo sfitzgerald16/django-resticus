@@ -30,5 +30,6 @@ setup(
     install_requires=[
         'Django>=2.2',
         'django-filter>=2.1.0',
+        'pyyaml'
     ],
 )

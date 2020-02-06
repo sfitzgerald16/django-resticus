@@ -122,7 +122,7 @@ class SchemaGenerator(object):
                     try:
                         name = view_class.model._meta.get_field(field).name
                         field_type = view_class.model._meta.get_field(field).get_internal_type()
-                        if self.fields_dict.get(field_type):
+                        if field_type in self.fields_dict:
                             model.update({name: self.fields_dict[field_type]})
                     except FieldDoesNotExist:
                         continue
@@ -141,7 +141,7 @@ class SchemaGenerator(object):
                                             related_name = related_obj._meta.get_field(f).name
                                             related_type = related_obj._meta.get_field(
                                                 f).get_internal_type()
-                                            if self.fields_dict.get(related_type):
+                                            if related_type in self.fields_dict:
                                                 properties.update(
                                                     {related_name: self.fields_dict[related_type]})
                                         except FieldDoesNotExist:
@@ -177,7 +177,7 @@ class SchemaGenerator(object):
             for field in callback.view_class.form_class._meta.fields:
                 field_type = callback.view_class.form_class._meta.model._meta.get_field(
                     field).get_internal_type()
-                if self.fields_dict.get(field_type):
+                if field_type in self.fields_dict:
                     form_param['schema']['properties'].update(
                         {field: self.fields_dict[field_type]})
                 else:
