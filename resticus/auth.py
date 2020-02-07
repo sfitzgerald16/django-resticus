@@ -5,7 +5,7 @@ from django.contrib import auth
 from django.core.exceptions import ImproperlyConfigured
 from django.middleware.csrf import CsrfViewMiddleware
 from django.utils.encoding import DjangoUnicodeDecodeError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from . import exceptions
 from .compat import get_model, get_user_model, smart_text

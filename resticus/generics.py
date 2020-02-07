@@ -1,7 +1,7 @@
 from django.core import paginator
 from django.core.exceptions import ImproperlyConfigured
 from django.forms.models import modelform_factory
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from . import exceptions, http, mixins
 from .serializers import Serializer

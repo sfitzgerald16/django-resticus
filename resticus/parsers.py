@@ -1,7 +1,7 @@
 from io import BytesIO
 
 from django.http.multipartparser import MultiPartParser, MultiPartParserError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from .exceptions import ParseError
 from .settings import api_settings
