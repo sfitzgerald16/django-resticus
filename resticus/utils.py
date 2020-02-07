@@ -7,14 +7,16 @@ except ImportError:
     from django_filters.filterset import FilterSet
 
 __all__ = [
-    'filterset_factory',
-    'patch_form',
+    "filterset_factory",
+    "patch_form",
 ]
 
 
 def filterset_factory(model, fields=ALL_FIELDS):
-    meta = type(str('Meta'), (object,), {'model': model, 'fields': fields})
-    filterset = type(str(f'{model._meta.object_name}FilterSet'), (FilterSet,), {'Meta': meta})
+    meta = type(str("Meta"), (object,), {"model": model, "fields": fields})
+    filterset = type(
+        str(f"{model._meta.object_name}FilterSet"), (FilterSet,), {"Meta": meta}
+    )
     return filterset
 
 

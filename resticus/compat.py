@@ -25,16 +25,19 @@ try:
     from django.contrib.auth import get_user_model
 except ImportError:
     from django.contrib.auth.models import User
+
     get_user_model = lambda: User
 
-AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+AUTH_USER_MODEL = getattr(settings, "AUTH_USER_MODEL", "auth.User")
 
 
 def get_model(model_lookup):
-    app_label, model_name = model_lookup.split('.')
+    app_label, model_name = model_lookup.split(".")
     try:
         from django.apps import apps
+
         return apps.get_model(app_label, model_name)
     except ImportError:
         from django.db import models
+
         return models.get_model(app_label, model_name)

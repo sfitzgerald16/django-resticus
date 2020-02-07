@@ -14,7 +14,7 @@ class iterdict(dict):
 
     def __init__(self, source):
         self.source = iter(source)
-        super().__init__({'hack': True})
+        super().__init__({"hack": True})
 
     def items(self):
         return self.source
@@ -43,7 +43,7 @@ class iterlist(list):
         except StopIteration:
             self.first = None
             self.empty = True
-        super().__init__('hack')
+        super().__init__("hack")
 
     def __bool__(self):
         return not self.empty

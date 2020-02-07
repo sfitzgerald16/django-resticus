@@ -9,9 +9,18 @@ from .settings import api_settings
 from .utils import filterset_factory
 from .views import Endpoint
 
-__all__ = ['GenericEndpoint', 'CreateEndpoint', 'ListEndpoint',
-    'DetailEndpoint', 'UpdateEndpoint', 'DeleteEndpoint', 'ListCreateEndpoint',
-    'DetailUpdateEndpoint', 'DetailDeleteEndpoint', 'DetailUpdateDeleteEndpoint']
+__all__ = [
+    "GenericEndpoint",
+    "CreateEndpoint",
+    "ListEndpoint",
+    "DetailEndpoint",
+    "UpdateEndpoint",
+    "DeleteEndpoint",
+    "ListCreateEndpoint",
+    "DetailUpdateEndpoint",
+    "DetailDeleteEndpoint",
+    "DetailUpdateDeleteEndpoint",
+]
 
 
 class GenericEndpoint(Endpoint):
@@ -20,7 +29,7 @@ class GenericEndpoint(Endpoint):
     serializer_class = Serializer
     fields = None
 
-    lookup_field = 'pk'
+    lookup_field = "pk"
     lookup_url_kwarg = None
 
     filter_class = None
@@ -40,8 +49,10 @@ class GenericEndpoint(Endpoint):
         if self.model is not None:
             return self.model._default_manager.all()
 
-        msg = _('{0} must either define "model" or "queryset", or '
-            'override "get_queryset()"')
+        msg = _(
+            '{0} must either define "model" or "queryset", or '
+            'override "get_queryset()"'
+        )
         raise ImproperlyConfigured(msg.format(self.__class__.__name__))
 
     def get_object(self):
@@ -51,15 +62,15 @@ class GenericEndpoint(Endpoint):
         try:
             lookup = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
         except KeyError:
-            msg = _('Lookup field "{0}" was not provided in view '
-                'kwargs to "{1}"')
-            raise ImproperlyConfigured(msg.format(lookup_url_kwarg,
-                self.__class__.__name__))
+            msg = _('Lookup field "{0}" was not provided in view ' 'kwargs to "{1}"')
+            raise ImproperlyConfigured(
+                msg.format(lookup_url_kwarg, self.__class__.__name__)
+            )
 
         try:
             obj = queryset.get(**lookup)
         except self.model.DoesNotExist:
-            raise exceptions.NotFound(_('Resource not found'))
+            raise exceptions.NotFound(_("Resource not found"))
 
         self.check_object_permissions(self.request, obj)
         return obj
@@ -85,16 +96,14 @@ class GenericEndpoint(Endpoint):
                 page_size = self.page_size
 
             self.paginator = paginator.Paginator(
-                object_list=queryset,
-                per_page=page_size,
-                allow_empty_first_page=True
+                object_list=queryset, per_page=page_size, allow_empty_first_page=True
             )
 
             try:
                 page_number = int(self.request.GET.get(self.page_query_param, 1))
                 self.page = self.paginator.page(page_number)
             except (ValueError, paginator.InvalidPage):
-                raise exceptions.NotFound(_('Invalid page.'))
+                raise exceptions.NotFound(_("Invalid page."))
 
             return self.page.object_list
         return queryset
@@ -102,7 +111,7 @@ class GenericEndpoint(Endpoint):
     def get_form_class(self):
         if self.form_class is not None:
             return self.form_class
-        return modelform_factory(self.model, fields=self.fields or '__all__')
+        return modelform_factory(self.model, fields=self.fields or "__all__")
 
     def get_form(self, data=None, files=None, **kwargs):
         FormClass = self.get_form_class()
@@ -110,7 +119,7 @@ class GenericEndpoint(Endpoint):
 
     def form_valid(self, form):
         self.object = form.save()
-        return {'data': self.serialize(self.object)}
+        return {"data": self.serialize(self.object)}
 
     def form_invalid(self, form):
         raise exceptions.ValidationError(form=form)
@@ -126,50 +135,32 @@ class GenericEndpoint(Endpoint):
             include=include,
             exclude=exclude,
             fixup=fixup,
-            request=self.request
+            request=self.request,
         ).data
 
 
-class CreateEndpoint(
-    mixins.CreateModelMixin,
-    GenericEndpoint
-):
+class CreateEndpoint(mixins.CreateModelMixin, GenericEndpoint):
     pass
 
 
-class ListEndpoint(
-    mixins.ListModelMixin,
-    GenericEndpoint
-):
+class ListEndpoint(mixins.ListModelMixin, GenericEndpoint):
     pass
 
 
-class DetailEndpoint(
-    mixins.DetailModelMixin,
-    GenericEndpoint
-):
+class DetailEndpoint(mixins.DetailModelMixin, GenericEndpoint):
     pass
 
 
-class UpdateEndpoint(
-    mixins.UpdateModelMixin,
-    mixins.PatchModelMixin,
-    GenericEndpoint
-):
+class UpdateEndpoint(mixins.UpdateModelMixin, mixins.PatchModelMixin, GenericEndpoint):
     pass
 
 
-class DeleteEndpoint(
-    mixins.DeleteModelMixin,
-    GenericEndpoint
-):
+class DeleteEndpoint(mixins.DeleteModelMixin, GenericEndpoint):
     pass
 
 
 class ListCreateEndpoint(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    GenericEndpoint
+    mixins.ListModelMixin, mixins.CreateModelMixin, GenericEndpoint
 ):
     pass
 
@@ -178,15 +169,13 @@ class DetailUpdateEndpoint(
     mixins.DetailModelMixin,
     mixins.UpdateModelMixin,
     mixins.PatchModelMixin,
-    GenericEndpoint
+    GenericEndpoint,
 ):
     pass
 
 
 class DetailDeleteEndpoint(
-    mixins.DetailModelMixin,
-    mixins.DeleteModelMixin,
-    GenericEndpoint
+    mixins.DetailModelMixin, mixins.DeleteModelMixin, GenericEndpoint
 ):
     pass
 
@@ -196,6 +185,6 @@ class DetailUpdateDeleteEndpoint(
     mixins.UpdateModelMixin,
     mixins.PatchModelMixin,
     mixins.DeleteModelMixin,
-    GenericEndpoint
+    GenericEndpoint,
 ):
     pass

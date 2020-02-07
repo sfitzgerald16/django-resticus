@@ -13,7 +13,7 @@ class BaseToken(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-            return self.key
+        return self.key
 
     def save(self, *args, **kwargs):
         if not self.key:
@@ -32,9 +32,7 @@ class BaseToken(models.Model):
 
 class Token(BaseToken):
     user = models.OneToOneField(
-        AUTH_USER_MODEL,
-        related_name='api_token',
-        on_delete=models.CASCADE
+        AUTH_USER_MODEL, related_name="api_token", on_delete=models.CASCADE
     )
 
     def get_user(self):

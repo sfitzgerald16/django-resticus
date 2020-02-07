@@ -1,5 +1,4 @@
-
-SAFE_METHODS = ('GET', 'HEAD', 'OPTIONS')
+SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
 
 
 class BasePermission(object):
@@ -27,6 +26,7 @@ class AllowAny(BasePermission):
     permission_classes list, but it's useful because it makes the intention
     more explicit.
     """
+
     def has_permission(self, request, view):
         return True
 
@@ -56,7 +56,7 @@ class IsAuthenticatedOrReadOnly(BasePermission):
 
     def has_permission(self, request, view):
         return (
-            request.method in SAFE_METHODS or
-            request.user and
-            request.user.is_authenticated
+            request.method in SAFE_METHODS
+            or request.user
+            and request.user.is_authenticated
         )

@@ -8,10 +8,10 @@ from .settings import api_settings
 
 
 def parse_content_type(content_type):
-    if ';' in content_type:
-        content_type, params = content_type.split(';', 1)
+    if ";" in content_type:
+        content_type, params = content_type.split(";", 1)
         try:
-            params = dict(param.split('=') for param in params.split())
+            params = dict(param.split("=") for param in params.split())
         except Exception:
             params = {}
     else:
@@ -24,7 +24,7 @@ def parse_plain_text(request, **extra):
 
 
 def parse_json(request, **extra):
-    charset = extra.get('charset', 'utf-8')
+    charset = extra.get("charset", "utf-8")
     try:
         data = request.body.decode(charset)
         return (api_settings.JSON_DECODER().decode(data), None)
@@ -37,7 +37,7 @@ def parse_form_encoded(request, **extra):
 
 
 def parse_multipart(request, **extra):
-    if hasattr(request, '_body'):
+    if hasattr(request, "_body"):
         # Use already read data
         data = BytesIO(request._body)
     else:

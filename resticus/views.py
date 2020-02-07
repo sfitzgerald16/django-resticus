@@ -20,7 +20,7 @@ from .schemas import SchemaGenerator
 from .serializers import serialize
 from .settings import api_settings
 
-__all__ = ['Endpoint', 'SessionAuthEndpoint', 'TokenAuthEndpoint']
+__all__ = ["Endpoint", "SessionAuthEndpoint", "TokenAuthEndpoint"]
 
 
 class Endpoint(View):
@@ -66,7 +66,7 @@ class Endpoint(View):
     streaming = False
 
     def parse_body(self, request):
-        if request.method not in ['POST', 'PUT', 'PATCH']:
+        if request.method not in ["POST", "PUT", "PATCH"]:
             return (None, None)
 
         content_type, params = parse_content_type(request.content_type)
@@ -95,8 +95,8 @@ class Endpoint(View):
 
         # User is not authenticated, so short circuit if login_required.
         handler = getattr(self, request.method.lower(), None)
-        if getattr(handler, 'login_required', self.login_required):
-            msg = _('You must be logged in to access this endpoint.')
+        if getattr(handler, "login_required", self.login_required):
+            msg = _("You must be logged in to access this endpoint.")
             raise exceptions.AuthenticationFailed(msg)
 
         return AnonymousUser()
@@ -190,7 +190,7 @@ class Endpoint(View):
         # WWW-Authenticate header for 401 responses, else coerce to 403
         auth_header = self.get_authenticate_header(self.request)
         if auth_header:
-            err.response['WWW-Authenticate'] = auth_header
+            err.response["WWW-Authenticate"] = auth_header
         else:
             err.response.status_code = 403
         return err.response
@@ -198,13 +198,13 @@ class Endpoint(View):
     def server_error(self, err):
         if settings.DEBUG:
             return http.Http500(str(err))
-        return http.Http500(_('Internal server error.'))
+        return http.Http500(_("Internal server error."))
 
     def api_exception(self, err):
         return err.response
 
     def streaming_response(self, data, **kwargs):
-        kwargs.setdefault('status', 200)
+        kwargs.setdefault("status", 200)
         return http.StreamingJSONResponse(data, **kwargs)
 
 
@@ -228,12 +228,10 @@ class SessionAuthEndpoint(Endpoint):
 
     login_required = False
 
-    user_fields = ('id', 'username', 'first_name', 'last_name', 'email')
+    user_fields = ("id", "username", "first_name", "last_name", "email")
 
     def get(self, request, **kwargs):
-        return http.Http200({
-            'data': serialize(request.user, fields=self.user_fields)
-        })
+        return http.Http200({"data": serialize(request.user, fields=self.user_fields)})
 
     get.login_required = True
 
@@ -242,25 +240,21 @@ class SessionAuthEndpoint(Endpoint):
         request.user = auth.authenticate(request, **credentials)
 
         if request.user is None:
-            raise exceptions.AuthenticationFailed(_('Invalid username/password.'))
+            raise exceptions.AuthenticationFailed(_("Invalid username/password."))
 
         if not request.user.is_active:
-            raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+            raise exceptions.AuthenticationFailed(_("User inactive or deleted."))
 
         auth.login(request, request.user)
         return self.get(request)
 
     def get_credentials(self, request):
-        username_field = getattr(get_user_model(), 'USERNAME_FIELD', 'username')
+        username_field = getattr(get_user_model(), "USERNAME_FIELD", "username")
 
-        username = request.data.get(username_field,
-            request.data.get('username'))
-        password = request.data.get('password')
+        username = request.data.get(username_field, request.data.get("username"))
+        password = request.data.get("password")
 
-        return {
-            username_field: username,
-            'password': password
-        }
+        return {username_field: username, "password": password}
 
 
 class TokenAuthEndpoint(Endpoint):
@@ -270,12 +264,12 @@ class TokenAuthEndpoint(Endpoint):
 
     login_required = False
 
-    user_fields = ('id', 'username', 'first_name', 'last_name', 'email')
+    user_fields = ("id", "username", "first_name", "last_name", "email")
 
     def get(self, request, **kwargs):
         data = serialize(request.user, fields=self.user_fields)
-        data['api_token'] = self.get_token(request).key
-        return http.Http200({'data': data})
+        data["api_token"] = self.get_token(request).key
+        return http.Http200({"data": data})
 
     get.login_required = True
 
@@ -284,24 +278,20 @@ class TokenAuthEndpoint(Endpoint):
         request.user = auth.authenticate(request, **credentials)
 
         if request.user is None:
-            raise exceptions.AuthenticationFailed(_('Invalid username/password.'))
+            raise exceptions.AuthenticationFailed(_("Invalid username/password."))
 
         if not request.user.is_active:
-            raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+            raise exceptions.AuthenticationFailed(_("User inactive or deleted."))
 
         return self.get(request)
 
     def get_credentials(self, request):
-        username_field = getattr(get_user_model(), 'USERNAME_FIELD', 'username')
+        username_field = getattr(get_user_model(), "USERNAME_FIELD", "username")
 
-        username = request.data.get(username_field,
-            request.data.get('username'))
-        password = request.data.get('password')
+        username = request.data.get(username_field, request.data.get("username"))
+        password = request.data.get("password")
 
-        return {
-            username_field: username,
-            'password': password
-        }
+        return {username_field: username, "password": password}
 
     def get_token(self, request):
         TokenModel = TokenAuth.get_token_model()
@@ -313,21 +303,18 @@ def get_schema_view(title=None, prefix=None, urlconf=None):
     """
     Returns a Swagger/OpenAPI schema
     """
+
     class SchemaView(Endpoint):
         exclude_from_schema = True
         permission_classes = [AllowAny]
 
         def get(self, request):
-            generator = SchemaGenerator(
-                title=title,
-                prefix=prefix,
-                urlconf=urlconf
-            )
+            generator = SchemaGenerator(title=title, prefix=prefix, urlconf=urlconf)
             schema = generator.get_schema(request=request)
             schema = yaml.dump(schema, allow_unicode=True)
 
             if not schema:
-                raise exceptions.ValidationError('Schema could not be generated.')
+                raise exceptions.ValidationError("Schema could not be generated.")
 
             return HttpResponse(schema)
 

@@ -9,10 +9,12 @@ from django.db import models
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
 
-__all__ = ['serialize', 'flatten']
+__all__ = ["serialize", "flatten"]
 
 
-def serialize_model(instance, fields=None, include=None, exclude=None, fixup=None, request=None):
+def serialize_model(
+    instance, fields=None, include=None, exclude=None, fixup=None, request=None
+):
     def getfield(name):
         try:
             return instance._meta.concrete_model._meta.get_field(name)
@@ -20,8 +22,9 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
             return None
 
     if fields is None:
-        fields = [field.name for field in
-            instance._meta.concrete_model._meta.local_fields]
+        fields = [
+            field.name for field in instance._meta.concrete_model._meta.local_fields
+        ]
     else:
         fields = list(fields)
 
@@ -37,7 +40,9 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
     for field in fields:
         if isinstance(field, str):
             model_field = getfield(field)
-            value = getattr(instance, model_field and getattr(model_field, 'attname', None) or field)
+            value = getattr(
+                instance, model_field and getattr(model_field, "attname", None) or field
+            )
             if isinstance(model_field, models.FileField):
                 value = value.url if value else None
                 if value is not None and request is not None:
@@ -65,7 +70,9 @@ def serialize_model(instance, fields=None, include=None, exclude=None, fixup=Non
     return data
 
 
-def serialize(src, fields=None, include=None, exclude=None, fixup=None, request=None, filter=None):
+def serialize(
+    src, fields=None, include=None, exclude=None, fixup=None, request=None, filter=None
+):
     """Serialize Model or a QuerySet instance to Python primitives.
     By default, all the model fields (and only the model fields) are
     serialized. If the field is a Python primitive, it is serialized as such,
@@ -118,8 +125,15 @@ def serialize(src, fields=None, include=None, exclude=None, fixup=None, request=
     """
 
     def subs(subsrc):
-        return serialize(subsrc, fields=fields, include=include,
-            exclude=exclude, fixup=fixup, request=request, filter=filter)
+        return serialize(
+            subsrc,
+            fields=fields,
+            include=include,
+            exclude=exclude,
+            fixup=fixup,
+            request=request,
+            filter=filter,
+        )
 
     if isinstance(src, models.Manager):
         return [subs(instance) for instance in builtins.filter(filter, src.all())]
@@ -131,8 +145,14 @@ def serialize(src, fields=None, include=None, exclude=None, fixup=None, request=
         return dict((key, subs(value)) for key, value in src.items())
 
     elif isinstance(src, models.Model):
-        return serialize_model(src, fields=fields, include=include,
-            exclude=exclude, fixup=fixup, request=request)
+        return serialize_model(
+            src,
+            fields=fields,
+            include=include,
+            exclude=exclude,
+            fixup=fixup,
+            request=request,
+        )
 
     else:
         return src
@@ -151,6 +171,7 @@ def flatten(attname):
             data[k] = v
         del data[attname]
         return data
+
     return fixup
 
 
@@ -161,7 +182,16 @@ class Serializer:
     fixup = None
     filter = None
 
-    def __init__(self, source, fields=None, include=None, exclude=None, fixup=None, request=None, filter=None):
+    def __init__(
+        self,
+        source,
+        fields=None,
+        include=None,
+        exclude=None,
+        fixup=None,
+        request=None,
+        filter=None,
+    ):
         self.source = source
         self.fields = fields or self.fields
         self.include = include or self.include
@@ -180,5 +210,12 @@ class Serializer:
         return data
 
     def serialize(self):
-        return serialize(self.source, fields=self.fields, include=self.include,
-            exclude=self.exclude, fixup=self.handle_fixup, request=self.request, filter=self.filter)
+        return serialize(
+            self.source,
+            fields=self.fields,
+            include=self.include,
+            exclude=self.exclude,
+            fixup=self.handle_fixup,
+            request=self.request,
+            filter=self.filter,
+        )

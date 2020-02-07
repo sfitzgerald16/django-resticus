@@ -13,8 +13,7 @@ from .http import HTTP_HEADER_ENCODING, Http200
 from .settings import api_settings
 
 
-__all__ = ['SessionAuth', 'BasicHttpAuth', 'SessionAuthEndpoint',
-    'login_required']
+__all__ = ["SessionAuth", "BasicHttpAuth", "SessionAuthEndpoint", "login_required"]
 
 
 def get_authorization_header(request):
@@ -22,8 +21,8 @@ def get_authorization_header(request):
     Return request's 'Authorization:' header, as a bytestring.
     Hide some test client ickyness where the header can be unicode.
     """
-    authorization = request.META.get('HTTP_AUTHORIZATION', b'')
-    if isinstance(authorization, type('')):
+    authorization = request.META.get("HTTP_AUTHORIZATION", b"")
+    if isinstance(authorization, type("")):
         # Work around django test client oddness
         authorization = authorization.encode(HTTP_HEADER_ENCODING)
     return authorization
@@ -45,13 +44,13 @@ class BaseAuth(object):
 
 class SessionAuth(BaseAuth):
     def authenticate(self, request):
-        user = getattr(request, 'user', None)
+        user = getattr(request, "user", None)
 
         if not user:
             return
 
         if user.is_authenticated and not user.is_active:
-            raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+            raise exceptions.AuthenticationFailed(_("User inactive or deleted."))
 
         self.enforce_csrf(request)
         return user
@@ -59,48 +58,51 @@ class SessionAuth(BaseAuth):
     def enforce_csrf(self, request):
         reason = CSRFCheck().process_view(request, None, (), {})
         if reason:
-            raise exceptions.Forbidden(_('CSRF Failed: {0}').format(reason))
+            raise exceptions.Forbidden(_("CSRF Failed: {0}").format(reason))
 
 
 class BasicHttpAuth(BaseAuth):
-    www_authenticate_realm = 'api'
+    www_authenticate_realm = "api"
 
     def authenticate(self, request):
         authdata = get_authorization_header(request).split()
 
-        if not authdata or authdata[0].lower() != b'basic':
+        if not authdata or authdata[0].lower() != b"basic":
             return
 
         if len(authdata) == 1:
-            msg = _('Invalid basic header. No credentials provided.')
+            msg = _("Invalid basic header. No credentials provided.")
             raise exceptions.AuthenticationFailed(msg)
         elif len(authdata) > 2:
-            msg = _('Invalid basic header. Credentials string should not contain spaces.')
+            msg = _(
+                "Invalid basic header. Credentials string should not contain spaces."
+            )
             raise exceptions.AuthenticationFailed(msg)
 
         try:
-            auth_parts = base64.b64decode(authdata[1]).decode(HTTP_HEADER_ENCODING).partition(':')
+            auth_parts = (
+                base64.b64decode(authdata[1])
+                .decode(HTTP_HEADER_ENCODING)
+                .partition(":")
+            )
         except Exception:
-            msg = _('Invalid basic header. Credentials not correctly base64 encoded.')
+            msg = _("Invalid basic header. Credentials not correctly base64 encoded.")
             raise exceptions.AuthenticationFailed(msg)
 
         userid, password = auth_parts[0], auth_parts[2]
         return self.authenticate_credentials(request, userid, password)
 
     def authenticate_credentials(self, request, userid, password):
-        username_field = getattr(get_user_model(), 'USERNAME_FIELD', 'username')
-        credentials = {
-            username_field: userid,
-            'password': password
-        }
+        username_field = getattr(get_user_model(), "USERNAME_FIELD", "username")
+        credentials = {username_field: userid, "password": password}
 
         user = auth.authenticate(**credentials)
 
         if user is None:
-            raise exceptions.AuthenticationFailed(_('Invalid username/password.'))
+            raise exceptions.AuthenticationFailed(_("Invalid username/password."))
 
         if not user.is_active:
-            raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+            raise exceptions.AuthenticationFailed(_("User inactive or deleted."))
 
         return user
 
@@ -112,14 +114,14 @@ class TokenAuth(BaseAuth):
     def authenticate(self, request):
         authdata = get_authorization_header(request).split()
 
-        if not authdata or authdata[0].lower() != b'token':
+        if not authdata or authdata[0].lower() != b"token":
             return
 
         if len(authdata) == 1:
-            msg = _('Invalid token header. No credentials provided.')
+            msg = _("Invalid token header. No credentials provided.")
             raise exceptions.AuthenticationFailed(msg)
         elif len(authdata) > 2:
-            msg = _('Invalid token header. Token string should not contain spaces.')
+            msg = _("Invalid token header. Token string should not contain spaces.")
             raise exceptions.AuthenticationFailed(msg)
 
         return self.authenticate_credentials(request, authdata[1])
@@ -127,8 +129,10 @@ class TokenAuth(BaseAuth):
     @staticmethod
     def get_token_model():
         if api_settings.TOKEN_MODEL is None:
-            msg = _('You must set `RESTICUS["TOKEN_MODEL"]` in your settings '
-                'to use TokenAuth.')
+            msg = _(
+                'You must set `RESTICUS["TOKEN_MODEL"]` in your settings '
+                "to use TokenAuth."
+            )
             raise ImproperlyConfigured(msg)
         return get_model(api_settings.TOKEN_MODEL)
 
@@ -138,18 +142,18 @@ class TokenAuth(BaseAuth):
         try:
             return User.objects.get(api_token__key=key.decode(encoding))
         except User.DoesNotExist:
-            raise exceptions.AuthenticationFailed(_('Invalid token.'))
+            raise exceptions.AuthenticationFailed(_("Invalid token."))
 
     def authenticate_credentials(self, request, key):
         user = self.lookup_user(request, key)
 
         if not user.is_active:
-            raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
+            raise exceptions.AuthenticationFailed(_("User inactive or deleted."))
 
         return user
 
     def authenticate_header(self, request):
-        return 'Token'
+        return "Token"
 
 
 def login_required(fn):
