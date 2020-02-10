@@ -235,7 +235,7 @@ class SchemaGenerator(object):
                                 {
                                     f: {
                                         "tags": [tag],
-                                        "summary": attr.__doc__.replace("object", name),
+                                        "summary": summary,
                                         "responses": {
                                             "204": {"description": "Deleted"}
                                         },
