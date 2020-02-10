@@ -7,8 +7,6 @@ from django.urls import URLPattern, URLResolver
 
 from . import mixins
 
-root_urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [""])
-
 
 class SchemaGenerator(object):
     def __init__(
@@ -16,7 +14,7 @@ class SchemaGenerator(object):
     ):
 
         if not urlconf:
-            self.urlconf = root_urlconf
+            self.urlconf = __import__(settings.ROOT_URLCONF, {}, {}, [""])
         else:
             self.urlconf = urlconf
 
