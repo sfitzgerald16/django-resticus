@@ -177,10 +177,13 @@ class SchemaGenerator(object):
         params_with_form = list(parameters)
 
         if callback.view_class.form_class:
+            description = ""
+            if callback.view_class.model:
+                description = callback.view_class.model.__name__ + " object."
             form_param = {
                 "name": "body",
                 "in": "body",
-                "description": callback.view_class.model.__name__ + " object.",
+                "description": description,
                 "required": True,
                 "schema": {"type": "object", "properties": {}},
             }
