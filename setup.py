@@ -27,6 +27,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
+    include_package_data=True,
     install_requires=[
         'Django>=2.2',
         'django-filter>=2.1.0',
