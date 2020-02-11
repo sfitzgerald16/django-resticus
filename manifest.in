@@ -1,3 +1,4 @@
 include README.md
 
+recursive-include resticus/static *
 recursive-include resticus/templates *
