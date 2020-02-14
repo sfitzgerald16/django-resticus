@@ -4,7 +4,7 @@ import json
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.postgres.fields import JSONField
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db import models
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
@@ -40,9 +40,12 @@ def serialize_model(
     for field in fields:
         if isinstance(field, str):
             model_field = getfield(field)
-            value = getattr(
-                instance, model_field and getattr(model_field, "attname", None) or field
-            )
+            try:
+                value = getattr(
+                    instance, model_field and getattr(model_field, "attname", None) or field
+                )
+            except ObjectDoesNotExist:
+                value = None
             if isinstance(model_field, models.FileField):
                 value = value.url if value else None
                 if value is not None and request is not None:
