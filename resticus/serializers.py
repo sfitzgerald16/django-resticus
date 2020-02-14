@@ -65,7 +65,10 @@ def serialize_model(
             if callable(value):
                 data[key] = value(instance)
             elif isinstance(value, dict):
-                data[key] = serialize(getattr(instance, key), **value)
+                try:
+                    data[key] = serialize(getattr(instance, key), **value)
+                except ObjectDoesNotExist:
+                    data[key] = None
 
     if fixup:
         data = fixup(instance, data)
