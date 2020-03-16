@@ -1,3 +1,4 @@
+from decimal import Decimal
 import builtins
 import inspect
 import json
@@ -54,12 +55,10 @@ def serialize_model(
             elif isinstance(value, GEOSGeometry):
                 # TODO: How to tap into this and get the pre-JSON data structure?
                 data[field] = json.loads(value.geojson)
-            elif isinstance(model_field, JSONField):
-                data[field] = value
             elif isinstance(value, models.Manager):
                 data[field] = [item.pk for item in value.all()]
             else:
-                data[field] = force_text(value, strings_only=True)
+                data[field] = value
         elif isinstance(field, tuple):
             key, value = field
             if callable(value):
