@@ -107,6 +107,7 @@ class TestEndpoint(TestCase):
         r = self.client.get('fail_view')
         self.assertEqual(r.status_code, 500)
         self.assertEqual(r.json['errors']['detail'][0]['message'], "Internal server error.")
+        self.assertTrue(r.error_tracked)
 
     def test_raw_request_body(self):
         raw = b'\x01\x02\x03'

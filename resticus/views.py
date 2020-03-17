@@ -197,8 +197,14 @@ class Endpoint(View):
 
     def server_error(self, err):
         if settings.DEBUG:
-            return http.Http500(str(err))
-        return http.Http500(_("Internal server error."))
+            response = http.Http500(str(err))
+        else:
+            response = http.Http500(_("Internal server error."))
+
+        if api_settings.ERROR_HANDLER is not None:
+            api_settings.ERROR_HANDLER(self, err, response)
+
+        return response
 
     def api_exception(self, err):
         return err.response
