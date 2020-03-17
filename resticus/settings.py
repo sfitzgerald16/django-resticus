@@ -11,6 +11,7 @@ DEFAULTS = {
         "resticus.auth.BasicHttpAuth",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("resticus.permissions.AllowAny",),
+    "ERROR_HANDLER": None,
     "JSON_DECODER": "resticus.encoders.JSONDecoder",
     "JSON_ENCODER": "resticus.encoders.JSONEncoder",
     "LOGIN_REQUIRED": False,
@@ -35,6 +36,7 @@ IMPORT_STRINGS = (
     "JSON_DECODER",
     "JSON_ENCODER",
     "DATA_PARSERS",
+    "ERROR_HANDLER",
 )
 
 

@@ -88,5 +88,6 @@ STATIC_URL = '/static/'
 RESTICUS = {
     'DEFAULT_AUTHENTICATION_CLASSES': (),
     'LOGIN_REQUIRED': False,
-    'TOKEN_MODEL': 'resticus.Token'
+    'TOKEN_MODEL': 'resticus.Token',
+    'ERROR_HANDLER': 'tests.handlers.track_errors',
 }
