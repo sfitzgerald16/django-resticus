@@ -21,7 +21,7 @@ class ListModelMixin(object):
         queryset = self.filter_queryset(queryset)
         queryset = self.paginate_queryset(queryset)
 
-        response = {"data": (self.serialize(obj) for obj in queryset.iterator())}
+        response = {"data": self.serialize(queryset)}
 
         if self.paginator is not None:
             response.update(
